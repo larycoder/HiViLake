@@ -35,3 +35,7 @@ https://github.com/keven4ever/kylo_docker
 https://kylo.readthedocs.io/en/v0.10.0
 ## Kylo docs v0.8.3
 https://kylo.readthedocs.io/en/v0.8.3
+=====================================================================================
+# Maven
+## Maven tutorial
+https://www.tutorialspoint.com/maven/index.htm
