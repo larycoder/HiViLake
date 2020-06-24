@@ -39,3 +39,9 @@ https://kylo.readthedocs.io/en/v0.8.3
 # Maven
 ## Maven tutorial
 https://www.tutorialspoint.com/maven/index.htm
+
+## Maven multi-module
+https://www.baeldung.com/maven-multi-module
+
+## Maven archetype building
+https://www.baeldung.com/maven-archetype
