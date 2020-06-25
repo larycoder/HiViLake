@@ -1,5 +1,4 @@
-doc/zip/*
-doc/Report/*.md
-doc/Report/image
-doc/Slice/*.md
-doc/Slice/image
+doc/zip
+doc/**/*.md
+doc/**/image
+**/target
