@@ -2,3 +2,4 @@ doc/zip
 doc/**/*.md
 doc/**/image
 **/target
+share

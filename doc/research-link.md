@@ -45,3 +45,7 @@ https://www.baeldung.com/maven-multi-module
 
 ## Maven archetype building
 https://www.baeldung.com/maven-archetype
+======================================================================================
+# Hadoop 3.2.1
+## Hadoop Document
+https://hadoop.apache.org/docs/r3.2.1/

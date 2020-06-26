@@ -1,7 +1,7 @@
 #!/usr/bin/bash
 
 install2Repo(){
-    sudo mvn install:install-file -Dfile=$1;
+    sudo mvn install:install-file -Dfile=$1 -DgroupId=$2 -DartifactId=$3 -Dversion=$4;
 }
 
 insertD2P(){
@@ -19,39 +19,52 @@ addPom(){
 
     # get information
     local file_path=$1;
-    local pom_file=$(unzip -c $file_path | grep "pom\.properties" | head -n1);
-    pom_file=${pom_file:12:$(echo -n $pom_file | wc -m)};
-    local maven_info=$(unzip -p $file_path $pom_file);
-    for string in $maven_info
+    local pom_files=$(unzip -l $file_path | grep "pom\.properties" | awk '{print $4}');
+    for pom_file in $pom_files
     do
-        if [[ $string == *"groupId"* ]]
+        local maven_info=$(unzip -p $file_path $pom_file);
+        for string in $maven_info
+        do
+            if [[ $string == *"groupId"* ]]
+            then
+                groupId=${string:8:$(echo -n $string | wc -m)};
+            elif [[ $string == *"artifactId"* ]]
+            then
+                artifactId=${string:11:$(echo -n $string | wc -m)};
+            elif [[ $string == *"version"* ]]
+            then
+                version=${string:8:$(echo -n $string | wc -m)};
+            fi
+        done
+
+        # update repo and push informatio to pom
+        local pom_path=$2;
+        if [[ -n $groupId && -n $artifactId && -n $version ]]
         then
-            groupId=${string:8:$(echo -n $string | wc -m)};
-        elif [[ $string == *"artifactId"* ]]
-        then
-            artifactId=${string:11:$(echo -n $string | wc -m)};
-        elif [[ $string == *"version"* ]]
-        then
-            version=${string:8:$(echo -n $string | wc -m)};
+            install2Repo $file_path $groupId $artifactId $version;
+
+            if [[ -n $pom_path ]]
+            then
+                insertD2P $pom_path $groupId $artifactId $version;
+            fi
+        else
+            echo "Wrong maven jar file !";
+            exit 1;
         fi
     done
+}
 
-    # push informatio to pom
-    local pom_path=$2;
-    if [[ -n $groupId && -n $artifactId && -n $version ]]
-    then
-        insertD2P $pom_path $groupId $artifactId $version;
-    fi
+searchInfo(){
+    local file_path=$1;
+    local pom_file=$(unzip -c $file_path | grep "pom\.properties" | head -n1);
+    pom_file=${pom_file:12:$(echo -n $pom_file | wc -m)};
+    unzip -p $file_path $pom_file;
 }
 
 case $1 in
     run)
-        if [[ $# == 2 ]]
+        if [[ $# > 1 ]]
         then
-            install2Repo $2;
-        elif [[ $# == 3 ]]
-        then
-            install2Repo $2;
             addPom $2 $3;
         else
             echo "Missing argument(s) !";
@@ -60,10 +73,14 @@ case $1 in
     import)
         echo "export PATH=$PATH:$(dirname $(which $0))";
         ;;
+    search)
+        searchInfo $2;
+        ;;
     *)
         echo "Usage:"
         echo "run (path-to-maven-jar) [path-to-pom] - install jar to maven repo";
         echo "import                                - import this script to PATH, embed it to eval";
+        echo "search (path-to-maven-jar)            - search informatio of maven jar"
         ;;
 esac
 
