@@ -1,0 +1,49 @@
+#!/usr/bin/bash
+
+build(){
+  sudo mvn compile assembly:single $1;
+}
+
+rebuild(){
+  sudo mvn clean compile assembly:single $1;
+}
+
+clean(){
+  sudo mvn clean;
+}
+
+run(){
+  if [[ -n $2 ]]
+  then
+    sudo mvn exec:java -Dexec.mainClass="$1" $3;
+  else
+    sudo java -cp ./target/*.jar $1;
+  fi
+}
+
+case $1 in
+  build)
+    build $2;
+    ;;
+  rebuild)
+    rebuild $2;
+    ;;
+  clean)
+    clean;
+    ;;
+  run)
+    if [[ $2 == "-e" ]]
+    then
+      run $3 $2 $4;
+    else
+      run $2;
+    fi
+    ;;
+  *)
+    usage_string=$(declare -F | awk '{print $3, "|"}');
+    usage_string=${usage_string::-2};
+    echo "Usage: {" $usage_string "}";
+    ;;
+esac
+
+exit 0;
