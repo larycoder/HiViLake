@@ -15,6 +15,10 @@
   <!-- FIXME change it to the project's website -->
   <url>https://github.com/larycoder/HiViLake</url>
 
+  <modules>
+    <module>ingest</module>
+  </modules>
+
   <dependencies>
     <dependency>
       <groupId>junit</groupId>
@@ -70,8 +74,4 @@
       </plugins>
     </pluginManagement>
   </build>
-
-  <modules>
-    <module>ingest</module>
-  </modules>
 </project>
