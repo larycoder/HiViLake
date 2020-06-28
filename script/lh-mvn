@@ -8,14 +8,18 @@ rebuild(){
   sudo mvn clean compile assembly:single $1;
 }
 
+compile(){
+  sudo mvn compile -q;
+}
+
 clean(){
   sudo mvn clean;
 }
 
 run(){
-  if [[ -n $2 ]]
+  if [[ -z $2 ]]
   then
-    sudo mvn exec:java -Dexec.mainClass="$1" $3;
+    sudo mvn -q exec:java -Dexec.mainClass="$1" $3;
   else
     sudo java -cp ./target/*.jar $1;
   fi
@@ -39,10 +43,17 @@ case $1 in
       run $2;
     fi
     ;;
+  compile)
+    compile;
+    ;;
   *)
     usage_string=$(declare -F | awk '{print $3, "|"}');
     usage_string=${usage_string::-2};
     echo "Usage: {" $usage_string "}";
+    echo "run [-e] (java main class) - execute java main class";
+    echo "RUN:";
+    echo "If using the maven exec plugin, running without \"-e\" option.";
+    echo "In contrast, running with pure java - add \"-e\" option";
     ;;
 esac
 
