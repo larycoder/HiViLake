@@ -12,6 +12,10 @@ import java.nio.file.Paths;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.*;
 
+import org.w3c.dom.*;
+import javax.xml.parsers.*;
+import org.xml.sax.SAXException;
+
 public class BasicIngest{
 // Variable
 
@@ -22,6 +26,8 @@ public class BasicIngest{
 
     String inputDir = null;
     String outputDir = null;
+
+    public boolean delSrc;
 
 // =========================================================================================== //
 // Constructor
@@ -72,7 +78,21 @@ public class BasicIngest{
     }
 
     public void setInputDir(String input) throws IOException{
-        if(lfs.exists(new Path(input))){
+        Path inputPath = new Path(input);
+        if(lfs.exists(inputPath)){
+            if(!lfs.getFileStatus(inputPath).isDirectory()){
+                throw new IOException("Input Path is not directory");
+            } else {
+                FileStatus[] fileStatus = lfs.listStatus(inputPath);
+                int has = 0;
+                for(FileStatus status : fileStatus){
+                    if(status.getPath().getName() != ".hivilake" && status.isDirectory()){
+                        has = 1;
+                        break;
+                    }
+                }
+                if(has == 0) throw new IOException("Input Path " + input + " is not hivilake Dir");
+            }
             this.inputDir = input;
             return;
         }
@@ -84,7 +104,21 @@ public class BasicIngest{
     }
 
     public void setOutputDir(String output) throws IOException{
-        if(hafs.exists(new Path(output))){
+        Path outputPath = new Path(output);
+        if(hafs.exists(outputPath)){
+            if(!hafs.getFileStatus(outputPath).isDirectory()){
+                throw new IOException("Output Path is not directory");
+            } else {
+                FileStatus[] fileStatus = hafs.listStatus(outputPath);
+                int has = 0;
+                for(FileStatus status : fileStatus){
+                    if(status.getPath().getName() != ".hivilake" && status.isDirectory()){
+                        has = 1;
+                        break;
+                    }
+                }
+                if(has == 0) throw new IOException("Output Path " + output + " is not hivilake Dir");
+            }
             this.outputDir = output;
             return;
         }
@@ -103,7 +137,7 @@ public class BasicIngest{
         return new Path(Paths.get(this.outputDir.toString(), file.toString()).toString());
     }
 
-    public void pushFile(Path input, Path output, boolean delSrc) throws IOException{
+    public void pushOneFile(Path input, Path output, boolean delSrc) throws IOException{
         Path finalInput = getAbsInput(input);
         Path finalOutput = getAbsOutput(output);
         hafs.copyFromLocalFile(delSrc, finalInput, finalOutput);
@@ -131,26 +165,135 @@ public class BasicIngest{
         // push file to hdfs
         Path[] arrayInputPath = new Path[listInputPath.size()];
         arrayInputPath = listInputPath.toArray(arrayInputPath);
-        hafs.copyFromLocalFile(delSrc, false, listInputPath.toArray(arrayIn), outputPath);
+        hafs.copyFromLocalFile(delSrc, false, listInputPath.toArray(arrayInputPath), outputPath);
     }
 
-    public static void main(String[] args) throws IOException{
+    public void pushFile(Path input, Path output, boolean delSrc) throws IOException{
+        FileStatus inputStatus = lfs.getFileStatus(getAbsInput(input));
+        FileStatus outputStatus = hafs.getFileStatus(getAbsOutput(output));
+
+        if(inputStatus.isDirectory()){
+            if(!outputStatus.isDirectory()){
+                throw new IOException("Incompatible argument: Input path is directory but Output path is not directory");
+            }
+            pushMultiFile(input, output, delSrc);
+        } else{
+            pushOneFile(input, output, delSrc);
+        }
+    }
+
+    protected Element loadXML(String path){
+        // Parse XML
+        // Method Variable
+        FSDataInputStream in = null;
+        Element result = null;
+
+        try{
+            // load XML file
+            in = getFS("local").open(getAbsInput(new Path(path)));
+            
+            // Get Document Builder
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder builder = factory.newDocumentBuilder();
+
+            // Build Document
+            Document document = builder.parse(in);
+
+            // Normalize
+            document.getDocumentElement().normalize();
+            
+            // get root node
+            result = document.getDocumentElement();
+        } catch(Exception e){
+            e.printStackTrace();
+            result = null;
+        } finally{
+            try{
+                in.close();
+            } catch(IOException e){
+                e.printStackTrace();
+            }
+            return result;
+        }
+    }
+
+    public void ingestFile() throws IOException{
+        Element files = loadXML(".hivilake/IOF.xml");
+
+        // get root of IO ingest
+        Path inputRoot = null;
+        Path outputRoot = null;
+
+        Element roots = (Element) files.getElementsByTagName("roots").item(0);
+        NodeList rootList = roots.getElementsByTagName("root");
+        for(int i = 0; i < rootList.getLength(); i++){
+            Element root = (Element) rootList.item(i);
+            String rootName = root.getElementsByTagName("name").item(0).getTextContent();
+            if(rootName.equals("input")){
+                String rootValue = root.getElementsByTagName("value").item(0).getTextContent();
+                inputRoot = new Path(rootValue);
+            } else if(rootName.equals("output")){
+                String rootValue = root.getElementsByTagName("value").item(0).getTextContent();
+                outputRoot = new Path(rootValue);
+            }
+        }
+
+        // following instruction
+        Element paths = (Element) files.getElementsByTagName("paths").item(0);
+        NodeList pathList = paths.getElementsByTagName("path");
+        for(int i = 0; i < pathList.getLength(); i++){
+            Element path = (Element) pathList.item(i);
+            
+            // set input path
+            String stringInputPath = path.getElementsByTagName("input").item(0).getTextContent();
+            Path inputPath = new Path(Paths.get(inputRoot.toString(), stringInputPath).toString());
+
+            // set output path
+            String stringOutputPath = path.getElementsByTagName("output").item(0).getTextContent();
+            Path outputPath = new Path(Paths.get(outputRoot.toString(), stringOutputPath).toString());
+
+            // push file to hadoop
+            pushFile(inputPath, outputPath, this.delSrc);
+        }
+    }
+
+    public static void main(String[] args) throws IOException, ParserConfigurationException, SAXException{
         BasicIngest bi = new BasicIngest();
         bi.setFS("file://", "hdfs://");
         bi.setInputDir("/tmp/hieplnc/hivilake/input");
         bi.setOutputDir("/user/root/hivilake/output");
-        
-        // List Path
-        System.out.println("List file:");
-        FileSystem fs = bi.getFS("local");
-        FileStatus[] fileStatus = fs.listStatus(new Path(bi.getInputDir()));
-        for(FileStatus status : fileStatus){
-            System.out.println(status.getPath().toString());
+
+        // set argument from outside
+        for(int i = 0; i < args.length; i++){
+            String[] parameter = args[i].split("=");
+            if(parameter[0].equals("--inputDir")) bi.setInputDir(parameter[1]);
+            else if(parameter[0].equals("--outputDir")) bi.setOutputDir(parameter[1]);
+            else if(parameter[0].equals("--delSrc")) bi.delSrc = Boolean.parseBoolean(parameter[1]);
+            else throw new IOException("Invalid Arguments");
         }
 
+        // push file to hadoop
+        bi.ingestFile();
+
+        //====================================================================================================//
+        // Test Path
+        
+        // List Path
+        // System.out.println("List file:");
+        // FileSystem fs = bi.getFS("local");
+        // FileStatus[] fileStatus = fs.listStatus(new Path(bi.getInputDir()));
+        // for(FileStatus status : fileStatus){
+        //     System.out.println(status.getPath().toString());
+        // }
+
         // Copy local file to hdfs
-        // bi.pushFile(new Path("./test.txt"), new Path("./"), false);
-        bi.pushMultiFile(new Path("./"), new Path("./"), false);
+        // bi.pushOneFile(new Path("./lh-mvn"), new Path("./"), false);
+        // bi.pushMultiFile(new Path("./"), new Path("./"), false);
+
+        // Automatic ingest file following IOF file
+        // bi.ingestFile();
+
+        //======================================================================================================//
 
         // close filesystem
         bi.closeFS();

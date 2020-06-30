@@ -49,3 +49,8 @@ https://www.baeldung.com/maven-archetype
 # Hadoop 3.2.1
 ## Hadoop Document
 https://hadoop.apache.org/docs/r3.2.1/
+
+======================================================================================
+# Java
+## XML parser
+https://www.baeldung.com/java-xml
