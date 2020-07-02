@@ -170,6 +170,24 @@ public class BasicIngest{
         hafs.copyFromLocalFile(delSrc, false, listInputPath.toArray(arrayInputPath), outputPath);
     }
 
+    protected void pushDir(Path input, Path output, boolean delSrc) throws IOException{
+        // get path
+        Path inputPath = getAbsInput(input);
+        Path outputPath = getAbsOutput(output);
+
+        // get status
+        FileStatus inputStatus = lfs.getFileStatus(inputPath);
+        FileStatus outputStatus = hafs.getFileStatus(outputPath);
+
+        // check directory
+        if (!inputStatus.isDirectory() || !outputStatus.isDirectory()){
+            throw new IOException("Input or Output Path is not directory");
+        }
+
+        // push file to hdfs
+        hafs.copyFromLocalFile(delSrc, false, inputPath, outputPath);
+    }
+
     public void pushFile(Path input, Path output, boolean delSrc) throws IOException{
         FileStatus inputStatus = lfs.getFileStatus(getAbsInput(input));
         FileStatus outputStatus = hafs.getFileStatus(getAbsOutput(output));
@@ -181,6 +199,14 @@ public class BasicIngest{
             pushMultiFile(input, output, delSrc);
         } else{
             pushOneFile(input, output, delSrc);
+        }
+    }
+
+    public void pushFile(Path input, Path output, boolean delSrc, boolean option) throws IOException{
+        if(option){
+            pushDir(input, output, delSrc);
+        } else {
+            pushFile(input, output, delSrc);
         }
     }
 
@@ -254,8 +280,13 @@ public class BasicIngest{
             String stringOutputPath = path.getElementsByTagName("output").item(0).getTextContent();
             Path outputPath = new Path(Paths.get(outputRoot.toString(), stringOutputPath).toString());
 
+            // get type
+            NodeList stringOption = path.getElementsByTagName("dir");
+            Boolean option = false;
+            if(stringOption.getLength() > 0) option = Boolean.parseBoolean(stringOption.item(0).getTextContent());
+
             // push file to hadoop
-            pushFile(inputPath, outputPath, this.delSrc);
+            pushFile(inputPath, outputPath, this.delSrc, option);
         }
     }
 
