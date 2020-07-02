@@ -3,6 +3,8 @@ package com.usth.hieplnc;
 import java.io.IOException;
 import java.io.FileNotFoundException;
 
+import java.lang.RuntimeException;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -266,14 +268,20 @@ public class BasicIngest{
         // set argument from outside
         for(int i = 0; i < args.length; i++){
             String[] parameter = args[i].split("=");
+
+            //set parameter
             if(parameter[0].equals("--inputDir")) bi.setInputDir(parameter[1]);
             else if(parameter[0].equals("--outputDir")) bi.setOutputDir(parameter[1]);
             else if(parameter[0].equals("--delSrc")) bi.delSrc = Boolean.parseBoolean(parameter[1]);
-            else throw new IOException("Invalid Arguments");
-        }
 
-        // push file to hadoop
-        bi.ingestFile();
+            // execute parameter
+            else if(parameter[0].equals("ingest")){
+                // push file to hadoop
+                bi.ingestFile();
+            }
+
+            else throw new RuntimeException("Invalid Arguments");
+        }
 
         //====================================================================================================//
         // Test Path
