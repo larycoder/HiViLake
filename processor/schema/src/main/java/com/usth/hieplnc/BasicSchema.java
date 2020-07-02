@@ -47,6 +47,6 @@ public class BasicSchema{
             System.out.println(nameDB);
         }
 
-        bi.closeConnection();
+        bs.closeConnection();
     }
 }
