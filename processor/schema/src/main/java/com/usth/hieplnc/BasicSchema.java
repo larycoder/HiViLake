@@ -47,6 +47,11 @@ public class BasicSchema{
         return virtualDB;
     }
 
+    public void setConnection(String url) throws SQLException{
+        this.url = url;
+        resetConnection();
+    }
+
     public void resetConnection() throws SQLException{
         closeConnection();
         con = DriverManager.getConnection(url);
@@ -137,8 +142,37 @@ public class BasicSchema{
         // initialize virtual database
         bs.setVirtualDB(new DatabaseConnection(bs.getConnection()));
 
-        // gen database following schema
-        bs.genDatabase();
+        // set argument for outside
+        for(int i = 0; i < args.length; i++){
+            String[] parameter = args[i].split("=");
+
+            // set parameter
+            if(parameter[0].equals("--fileSystem")) bs.setFS((new Path(parameter[1])).getFileSystem(conf));
+            else if(parameter[0].equals("--schemaDir")) bs.loadXML(parameter[1]);
+            else if(parameter[0].equals("--sqlURL")){
+                bs.setConnection(parameter[1]);
+                try{
+                    bs.getVirtualDB().close();
+                } catch(NullPointerException e){}
+                bs.setVirtualDB(new DatabaseConnection(bs.getConnection()));
+            }
+
+            // execute parameter
+            else if(parameter[0].equals("genDatabase")) bs.genDatabase();
+            else if(parameter[0].equals("listDatabase")){
+                ResultSet listDB = bs.getVirtualDB().listDatabase();
+                while(listDB.next()){
+                    System.out.println(listDB.getString(1));
+                }
+            }
+            else if(parameter[0].equals("listTableOf")){
+                bs.getVirtualDB().useDatabase(parameter[1]);
+                ResultSet listTable = bs.getVirtualDB().listTable();
+                while(listTable.next()){
+                    System.out.println(listTable.getString(1));
+                }
+            }
+        }
 
 //======================================================================================//
 // test
