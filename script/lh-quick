@@ -1,0 +1,16 @@
+#!/bin/bash
+
+set(){
+    echo "alias quick=\"lh-mvn compile; lh-mvn run $1\"";
+}
+
+case $1 in
+    set)
+        set $2;
+        ;;
+    *)
+        echo -e "Usage:\n\tset {class to run}";
+        ;;
+esac
+
+exit 0;
