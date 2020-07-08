@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<files>
+    <roots>
+    <!-- Set root of Feeder-->
+        <root>
+            <name>input</name>
+            <value>./</value>
+        </root>
+        <root>
+            <name>output</name>
+            <value>./</value>
+        </root>
+    </roots>
+    
+    <paths>
+    <!-- Configure schema for input file-->
+        <path>
+            <input>./</input>
+            <output>./</output>
+        </path>
+        <path>
+            <input>file_path</input>
+            <output>./</output>
+            <dir>true</dir>
+        </path>
+    </paths>
+</files>

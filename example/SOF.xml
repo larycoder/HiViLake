@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<schema>
+    <name>hivilake.schema.basic</name>
+    <database>
+        <name>basic_audit</name>
+        <tables>
+            <table>
+                <name>Feed</name>
+                <column>
+                    <name>Path</name>
+                    <type>VARCHAR(100)</type>
+                </column>
+                <column>
+                    <name>Count</name>
+                    <type>int(11)</type>
+                </column>
+                <column>
+                    <name>Type</name>
+                    <type>VARCHAR(20)</type>
+                </column>
+            </table>
+        </tables>
+    </database>
+</schema>
