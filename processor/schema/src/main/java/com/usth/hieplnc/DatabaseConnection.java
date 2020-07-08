@@ -53,6 +53,25 @@ public class DatabaseConnection{
     return stmt.executeQuery("SELECT `database_name` FROM `virtual_database`");
   }
 
+  public void dropDatabase(String nameDB) throws SQLException{
+    if(hasDatabase(nameDB) < 0) throw new SQLException("Database " + nameDB + " is not exists");
+    useDatabase(nameDB);
+
+    // drop table of database
+    ResultSet tableList = listTable();
+    while(tableList.next()){
+      stmt.execute("DROP TABLE IF EXISTS `" + getTable(tableList.getString(1)) + "`;");
+    }
+
+    // delete metadata of database
+    stmt.executeUpdate("DELETE FROM `map_table` WHERE `database_id` = \"" + databaseID + "\";");
+    stmt.executeUpdate("DELETE FROM `virtual_database` WHERE `id` = \"" + databaseID + "\";");
+
+    // stop using database
+    databaseID = 0;
+    db = null;
+  }
+
   public void useDatabase(String nameDB) throws SQLException{
     int tempID = hasDatabase(nameDB);
     if(tempID < 0) throw new SQLException("Database " + nameDB + " is not exists");
@@ -89,14 +108,16 @@ public class DatabaseConnection{
 
   public ResultSet listTable() throws SQLException{
     if(db == null) throw new NullPointerException("Null database");
-    String query = "SELECT `table_name` FROM `map_table` WHERE `database_id` = " + databaseID;
+    String query = "SELECT `table_name` FROM `map_table` WHERE `database_id` = \"" + databaseID + "\";";
     return stmt.executeQuery(query);
   }
 
   public String getTable(String table) throws SQLException{
     if(db == null) throw new NullPointerException("Null database");
-    String query = "SELECT `table_pos` FROM `map_table` WHERE `database_id` = " + databaseID + " AND `table_name` = " + table + ";";
-    return stmt.executeQuery(query).getString(1);
+    String query = "SELECT `table_pos` FROM `map_table` WHERE `database_id` = \"" + databaseID + "\" AND `table_name` = \"" + table + "\";";
+    ResultSet result = stmt.executeQuery(query);
+    result.next();
+    return result.getString(1);
   }
 
   public void close() throws SQLException{

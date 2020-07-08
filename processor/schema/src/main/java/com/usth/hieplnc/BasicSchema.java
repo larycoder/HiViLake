@@ -172,6 +172,9 @@ public class BasicSchema{
                     System.out.println(listTable.getString(1));
                 }
             }
+            else if(parameter[0].equals("dropDatabase")){
+                bs.getVirtualDB().dropDatabase(parameter[1]);
+            }
         }
 
 //======================================================================================//
