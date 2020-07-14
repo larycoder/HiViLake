@@ -28,6 +28,8 @@ public class BasicIngest{
     FileSystem lfs = null;
     FileSystem hafs = null;
 
+    FileFinder finder = null;
+
     String inputDir = null;
     String outputDir = null;
 
@@ -55,6 +57,7 @@ public class BasicIngest{
         if(lfs != null){
             if(this.lfs != null) this.lfs.close();
             this.lfs = (new Path(lfs)).getFileSystem(conf);
+            this.finder = new FileFinder(this.lfs);
         }
         if(hafs != null){
             if(this.hafs != null) this.hafs.close();
@@ -141,74 +144,33 @@ public class BasicIngest{
         return new Path(Paths.get(this.outputDir.toString(), file.toString()).toString());
     }
 
-    public void pushOneFile(Path input, Path output, boolean delSrc) throws IOException{
-        Path finalInput = getAbsInput(input);
-        Path finalOutput = getAbsOutput(output);
-        hafs.copyFromLocalFile(delSrc, finalInput, finalOutput);
-    }
+    
 
-    public void pushMultiFile(Path input, Path output, boolean delSrc) throws IOException{
-        FileStatus inputStatus = lfs.getFileStatus(getAbsInput(input));
-        FileStatus outputStatus = hafs.getFileStatus(getAbsOutput(output));
+    public void pushFile(Path input, Path output, boolean delSrc, String option) throws IOException{
+        output = getAbsOutput(output);
+        input = getAbsInput(input);
+        finder.setPattern(input.toString());
+        FileStatus inputPath;
 
-        // check directory
-        if (!inputStatus.isDirectory() || !outputStatus.isDirectory()){
-            throw new IOException("Input or Output Path is not directory");
-        }
-
-        // get list of file
-        FileStatus[] listInputStatus = lfs.listStatus(getAbsInput(input));
-
-        List<Path> listInputPath = new ArrayList<Path>();
-        Path outputPath = getAbsOutput(output);
-
-        for(FileStatus status : listInputStatus){
-            if(status.isFile()) listInputPath.add(status.getPath());
-        }
-
-        // push file to hdfs
-        Path[] arrayInputPath = new Path[listInputPath.size()];
-        arrayInputPath = listInputPath.toArray(arrayInputPath);
-        hafs.copyFromLocalFile(delSrc, false, listInputPath.toArray(arrayInputPath), outputPath);
-    }
-
-    protected void pushDir(Path input, Path output, boolean delSrc) throws IOException{
-        // get path
-        Path inputPath = getAbsInput(input);
-        Path outputPath = getAbsOutput(output);
-
-        // get status
-        FileStatus inputStatus = lfs.getFileStatus(inputPath);
-        FileStatus outputStatus = hafs.getFileStatus(outputPath);
-
-        // check directory
-        if (!inputStatus.isDirectory() || !outputStatus.isDirectory()){
-            throw new IOException("Input or Output Path is not directory");
-        }
-
-        // push file to hdfs
-        hafs.copyFromLocalFile(delSrc, false, inputPath, outputPath);
-    }
-
-    public void pushFile(Path input, Path output, boolean delSrc) throws IOException{
-        FileStatus inputStatus = lfs.getFileStatus(getAbsInput(input));
-        FileStatus outputStatus = hafs.getFileStatus(getAbsOutput(output));
-
-        if(inputStatus.isDirectory()){
-            if(!outputStatus.isDirectory()){
-                throw new IOException("Incompatible argument: Input path is directory but Output path is not directory");
+        while(finder.next()){
+            inputPath = finder.getFile();
+            if(option.equals("file")){
+                if(inputPath.isFile()){
+                    hafs.copyFromLocalFile(delSrc, inputPath.getPath(), output);
+                } else{
+                    continue;
+                }
+            } else if(option.equals("dir")){
+                if(inputPath.isDirectory()){
+                    hafs.copyFromLocalFile(delSrc, inputPath.getPath(), output);
+                } else{
+                    continue;
+                }
+            } else if(option.equals("both")){
+                hafs.copyFromLocalFile(delSrc, inputPath.getPath(), output);
+            } else{
+                throw new IOException("Can not decide action for path: " + inputPath.getPath().toString());
             }
-            pushMultiFile(input, output, delSrc);
-        } else{
-            pushOneFile(input, output, delSrc);
-        }
-    }
-
-    public void pushFile(Path input, Path output, boolean delSrc, boolean option) throws IOException{
-        if(option){
-            pushDir(input, output, delSrc);
-        } else {
-            pushFile(input, output, delSrc);
         }
     }
 
@@ -283,9 +245,9 @@ public class BasicIngest{
             Path outputPath = new Path(Paths.get(outputRoot.toString(), stringOutputPath).toString());
 
             // get type
-            NodeList stringOption = path.getElementsByTagName("dir");
-            Boolean option = false;
-            if(stringOption.getLength() > 0) option = Boolean.parseBoolean(stringOption.item(0).getTextContent());
+            NodeList stringOption = path.getElementsByTagName("type");
+            String option = "both";
+            if(stringOption.getLength() > 0) option = stringOption.item(0).getTextContent();
 
             // push file to hadoop
             pushFile(inputPath, outputPath, this.delSrc, option);
@@ -352,6 +314,9 @@ public class BasicIngest{
         //     System.out.println(myFinder.getFile().getPath().toString());
         // }
         
+        // test copy to hadoop
+        // FileSystem myFS = bi.getFS("hadoop");
+        // myFS.copyFromLocalFile(false, bi.getAbsInput(new Path("test_path")), bi.getAbsOutput(new Path("./ee")));
 
         //======================================================================================================//
 
