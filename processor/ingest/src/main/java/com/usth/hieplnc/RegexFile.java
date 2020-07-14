@@ -11,13 +11,16 @@ public class RegexFile implements PathFilter{
 
     FileSystem fs = null;
     String pattern = null;
-
     ArrayList<Pattern> engine = null;
+    public boolean fileOnly = false;
+    public boolean dirOnly = false;
 
 //=========================================================================//
 // constructor
 
-    public RegexFile(FileSystem fs){ this.fs = fs; }
+    public RegexFile(FileSystem fs){
+        this.fs = fs;
+    }
 
 //=========================================================================//
 // method
@@ -29,7 +32,7 @@ public class RegexFile implements PathFilter{
 
     public String getRegexPath(){ return pattern; }
 
-    private static ArrayList<String> parseRegexPath(String pattern){
+    public static ArrayList<String> parseRegexPath(String pattern){
         ArrayList<String> pathName = new ArrayList<>();
         Path path = new Path(pattern);
         pathName.add(path.getName());
@@ -51,8 +54,26 @@ public class RegexFile implements PathFilter{
         this.engine = engine;
     }
 
+    
+
     @Override
     public boolean accept(Path path){
+        if(fileOnly){
+            try{
+                if(!fs.getFileStatus(path).isFile()) return false;
+            } catch(Exception e){
+                e.printStackTrace();
+            }
+        }
+
+        if(dirOnly){
+            try{
+                if(!fs.getFileStatus(path).isDirectory()) return false;
+            } catch(Exception e){
+                e.printStackTrace();
+            }
+        }
+
         ArrayList<String> realPath = parseRegexPath(path.toString());
 
         if(engine.size() < realPath.size()) return false;

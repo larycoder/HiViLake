@@ -18,6 +18,8 @@ import org.w3c.dom.*;
 import javax.xml.parsers.*;
 import org.xml.sax.SAXException;
 
+import com.usth.hieplnc.FileFinder;
+
 public class BasicIngest{
 // Variable
 
@@ -331,6 +333,25 @@ public class BasicIngest{
 
         // Automatic ingest file following IOF file
         // bi.ingestFile();
+
+        // test regex filter
+        // FileSystem testFs = bi.getFS("local");
+        // RegexFile testPattern = new RegexFile(testFs);
+        // testPattern.dirOnly = true;
+        // testPattern.setRegexPath(bi.getAbsInput(new Path("./test*")).toString());
+        // FileStatus[] listStatus = testFs.listStatus(bi.getAbsInput(new Path("./")), testPattern);
+        // for(FileStatus i : listStatus){
+        //     System.out.println(i.getPath().toString());
+        // }
+
+        // test explore directory
+        // FileSystem testFs = bi.getFS("local");
+        // FileFinder myFinder = new FileFinder(testFs);
+        // myFinder.setPattern(bi.getAbsInput(new Path(".*/.*")).toString());
+        // while(myFinder.next()){
+        //     System.out.println(myFinder.getFile().getPath().toString());
+        // }
+        
 
         //======================================================================================================//
 
