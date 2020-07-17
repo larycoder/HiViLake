@@ -54,3 +54,11 @@ https://hadoop.apache.org/docs/r3.2.1/
 # Java
 ## XML parser
 https://www.baeldung.com/java-xml
+
+=======================================================================================
+# Metadata system
+## Delta Lake
+https://databricks.com/blog/2019/08/21/diving-into-delta-lake-unpacking-the-transaction-log.html
+
+## Apache Hudi: Building DataLake
+https://olivermascarenhas.com/2020-04-13-building-analytical-datalake-with-apache-spark-and-apache-hudi/
