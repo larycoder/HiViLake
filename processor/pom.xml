@@ -18,6 +18,8 @@
   <modules>
     <module>ingest</module>
     <module>schema</module>
+    <module>process-server</module>
+    <module>metadata</module>
   </modules>
 
   <dependencies>
