@@ -74,3 +74,8 @@ https://olivermascarenhas.com/2020-04-13-building-analytical-datalake-with-apach
 
 ## Apache Hudi: why does urber create apache hudi
 https://hub.packtpub.com/why-uber-created-hudi-an-open-source-incremental-processing-framework-on-apache-hadoop/
+
+======================================================================================
+# Spark
+## Spark: Dataframe explaination
+https://jaceklaskowski.gitbooks.io/mastering-spark-sql/spark-sql-DataFrame.html
