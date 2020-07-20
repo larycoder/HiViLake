@@ -1,4 +1,4 @@
-package com.usth.hieplnc;
+package com.usth.hieplnc.ingest;
 
 import java.io.IOException;
 import java.io.FileNotFoundException;
@@ -18,7 +18,7 @@ import org.w3c.dom.*;
 import javax.xml.parsers.*;
 import org.xml.sax.SAXException;
 
-import com.usth.hieplnc.FileFinder;
+import com.usth.hieplnc.ingest.FileFinder;
 
 public class BasicIngest{
 // Variable
@@ -143,8 +143,6 @@ public class BasicIngest{
     public Path getAbsOutput(Path file){
         return new Path(Paths.get(this.outputDir.toString(), file.toString()).toString());
     }
-
-    
 
     public void pushFile(Path input, Path output, boolean delSrc, String option) throws IOException{
         output = getAbsOutput(output);

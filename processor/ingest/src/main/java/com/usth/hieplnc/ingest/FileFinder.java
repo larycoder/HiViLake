@@ -1,6 +1,6 @@
-package com.usth.hieplnc;
+package com.usth.hieplnc.ingest;
 
-import com.usth.hieplnc.RegexFile;
+import com.usth.hieplnc.ingest.RegexFile;
 
 import org.apache.hadoop.fs.*;
 

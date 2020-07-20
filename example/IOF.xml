@@ -14,7 +14,13 @@
     </roots>
     
     <paths>
-    <!-- Configure schema for input file-->
+    <!--
+        Configure schema for input file
+        each path (now) has 3 value:
+        - input
+        - output
+        - type: file / dir / both
+    -->
         <path>
             <input>./</input>
             <output>./</output>
@@ -22,7 +28,7 @@
         <path>
             <input>file_path</input>
             <output>./</output>
-            <dir>true</dir>
+            <type>file</type>
         </path>
     </paths>
 </files>

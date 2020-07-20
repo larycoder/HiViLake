@@ -1,4 +1,4 @@
-package com.usth.hieplnc;
+package com.usth.hieplnc.schema;
 
 import java.sql.*;
 

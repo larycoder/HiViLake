@@ -1,4 +1,4 @@
-package com.usth.hieplnc;
+package com.usth.hieplnc.schema;
 
 import java.sql.*;
 
@@ -12,7 +12,7 @@ import org.w3c.dom.*;
 import javax.xml.parsers.*;
 import org.xml.sax.SAXException;
 
-import com.usth.hieplnc.DatabaseConnection;
+import com.usth.hieplnc.schema.DatabaseConnection;
 
 public class BasicSchema{
 // variable
