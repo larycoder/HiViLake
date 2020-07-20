@@ -60,5 +60,17 @@ https://www.baeldung.com/java-xml
 ## Delta Lake
 https://databricks.com/blog/2019/08/21/diving-into-delta-lake-unpacking-the-transaction-log.html
 
+## Delta Lake Architecture
+https://blog.knoldus.com/databricks-delta-architecture/
+
+## Delta Lake: feature, pros and cons
+https://www.jamesserra.com/archive/2019/10/databricks-delta-lake/
+
+## Delta Lake: simple tutorial
+https://dzone.com/articles/databricks-delta-lake-using-java
+
 ## Apache Hudi: Building DataLake
 https://olivermascarenhas.com/2020-04-13-building-analytical-datalake-with-apache-spark-and-apache-hudi/
+
+## Apache Hudi: why does urber create apache hudi
+https://hub.packtpub.com/why-uber-created-hudi-an-open-source-incremental-processing-framework-on-apache-hadoop/
