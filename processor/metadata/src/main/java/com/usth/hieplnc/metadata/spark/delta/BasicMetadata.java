@@ -1,20 +1,24 @@
 package com.usth.hieplnc.metadata.spark.delta;
 
 import org.apache.spark.sql.SparkSession;
-import org.apache.spark.sql.Encoder;
-import org.apache.spark.sql.Encoders;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.RowFactory;
 import org.apache.spark.sql.types.StructType;
 import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.Metadata;
+import org.apache.spark.sql.functions;
+import org.apache.spark.sql.Column;
+
+import io.delta.tables.DeltaTable;
 
 import org.apache.spark.sql.types.DataTypes;
 
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+
 import java.lang.NullPointerException;
 
 public class BasicMetadata{
@@ -23,6 +27,7 @@ public class BasicMetadata{
     private String deltaPos = null;
     private SparkSession context = null;
     private Dataset<Row> metaTable = null;
+    private DeltaTable metaDeltaTable = null;
 
 //=============================================================================//
 // constructor
@@ -40,8 +45,9 @@ public class BasicMetadata{
 //=============================================================================//
 // method
 
-    public void setPos(String position){
+    public BasicMetadata setPos(String position){
         this.deltaPos = position;
+        return this;
     }
 
     public String getPos(){
@@ -52,6 +58,14 @@ public class BasicMetadata{
         if(deltaPos == null) throw new NullPointerException("The metadata position is not exists");
         metaTable = context.read().format("delta").load(deltaPos);
     }
+
+    public DeltaTable loadDelta(){
+        if(deltaPos == null) throw new NullPointerException("The metadata position is not exists");
+        metaDeltaTable = DeltaTable.forPath(context, deltaPos);
+        return metaDeltaTable;
+    }
+
+    public DeltaTable getDelta(){ return metaDeltaTable; }
 
     private void createTable(List<Row> data, StructType schema){
         metaTable = context.createDataFrame(data, schema);
@@ -73,6 +87,15 @@ public class BasicMetadata{
         createTable(tableData, tableSchema);
     }
 
+    public void createTable(List<String> schema){
+        StructType tableSchema = new StructType();
+        for(String i : schema){
+            tableSchema = tableSchema.add(i, DataTypes.StringType);
+        }
+
+        createTable(new ArrayList<Row>(), tableSchema);
+    }
+
     public Dataset<Row> getTable(){ return metaTable; }
 
     public void saveTable(){
@@ -82,23 +105,26 @@ public class BasicMetadata{
     }
 
     public static void main(String[] args){
-        SparkSession mySession = SparkSession.builder().master("local[*]").appName("metadata test").getOrCreate();
-
+        SparkSession mySession = SparkSession.builder().master("local[*]").appName("metadata test").config("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension").config("spark.sql.catalog.spark_catalog", "org.apache.spark.sql.delta.catalog.DeltaCatalog").getOrCreate();
         BasicMetadata myMeta = new BasicMetadata(mySession);
 
-        List<List<String>> testData = new ArrayList<>();
-        testData.add(Arrays.asList("hiep", "21", "usth"));
-        testData.add(Arrays.asList("huyen", "21", "usth"));
-        testData.add(Arrays.asList("bach", "21", "usth"));
-        List<String> testSchema = new ArrayList<>(Arrays.asList("name", "age", "university"));
+        // List<List<String>> testData = new ArrayList<>();
+        // testData.add(Arrays.asList("hiep", "21", "usth"));
+        // List<String> testSchema = new ArrayList<>(Arrays.asList("name", "age", "university"));
+        // myMeta.createTable(testSchema);
+        // Dataset<Row> myDF = myMeta.getTable();
+        // myDF.show();
 
-        myMeta.createTable(testData, testSchema);
-        Dataset<Row> empDF = myMeta.getTable();
-
-        //empDF.write().format("delta").save("/tmp/metadata/firstDelta");
-        //empDF.write().format("delta").mode("append").save("/tmp/metadata/firstDelta");
-        // empDF = mySession.read().format("delta").load("/tmp/metadata/firstDelta");
-        empDF.show();
+        DeltaTable myDelta = myMeta.setPos("/tmp/metadata/firstDelta").loadDelta();
+        myDelta.update(
+            functions.expr("id == 22"),
+            new HashMap<String, Column>(){{
+                put("name", functions.expr("'back'"));
+            }}
+        );
+        Dataset<Row> myDF = myDelta.toDF();
+        myDF.show();
+        // System.out.println(myDF.schema().treeString());
         
         // close context
         mySession.close();
