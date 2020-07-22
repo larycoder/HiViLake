@@ -79,3 +79,6 @@ https://hub.packtpub.com/why-uber-created-hudi-an-open-source-incremental-proces
 # Spark
 ## Spark: Dataframe explaination
 https://jaceklaskowski.gitbooks.io/mastering-spark-sql/spark-sql-DataFrame.html
+
+## Spark: Column class explaination
+https://mungingdata.com/apache-spark/column-methods/
