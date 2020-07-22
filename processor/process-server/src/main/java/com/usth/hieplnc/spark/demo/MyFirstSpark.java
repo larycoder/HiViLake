@@ -25,7 +25,7 @@ public class MyFirstSpark{
         System.out.println("hello spark");
 
         // initializing spark
-        SparkConf mySparkConf = new SparkConf().setAppName("myFristSpark").setMaster("local");
+        SparkConf mySparkConf = new SparkConf().setAppName("myFristSpark").setMaster("yarn");
         JavaSparkContext mySparkContext = new JavaSparkContext(mySparkConf);
 
         // create RDD by: Parallelized Collections
@@ -36,6 +36,7 @@ public class MyFirstSpark{
 
         // stop spark
         mySparkContext.stop();
+        System.getProperties().list(System.out);
     }
 
 }
