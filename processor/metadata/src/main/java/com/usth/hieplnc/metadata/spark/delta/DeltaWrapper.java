@@ -5,6 +5,8 @@ import io.delta.tables.DeltaTable;
 import org.apache.spark.sql.types.StructType;
 import org.apache.spark.sql.functions;
 import org.apache.spark.sql.Column;
+import org.apache.spark.sql.Dataset;
+import org.apache.spark.sql.Row;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -43,5 +45,7 @@ public class DeltaWrapper{
             columnData
         );
     }
+
+    public void delete(String condition){ table.delete(condition); }
     
 }

@@ -52,24 +52,32 @@ public class BasicMetadata{
         return deltaPos;
     }
 
-    public void loadTable(){
+    private void loadTable(){
         if(deltaPos == null) throw new NullPointerException("The metadata position is not exists");
         metaTable = context.read().format("delta").load(deltaPos);
     }
 
-    public DeltaWrapper loadDelta(){
+    private void loadDelta(){
         if(deltaPos == null) throw new NullPointerException("The metadata position is not exists");
         metaDeltaTable = new DeltaWrapper(DeltaTable.forPath(context, deltaPos));
-        return metaDeltaTable;
     }
 
-    public DeltaWrapper getDelta(){ return metaDeltaTable; }
+    public BasicMetadata load(){
+        loadTable();
+        loadDelta();
+        return this;
+    }
+
+    public void update(String condition, HashMap<String, String> listValue){
+        if(metaDeltaTable == null) throw new NullPointerException("DeltaTable is not exists");
+        metaDeltaTable.update(condition, listValue);
+    }
 
     private void createTable(List<Row> data, StructType schema){
         metaTable = context.createDataFrame(data, schema);
     }
 
-    public void createTable(List<List<String>> data, List<String> schema){
+    private void createTable(List<List<String>> data, List<String> schema){
         List<Row> tableData = new ArrayList<>();
         for(List<String> i : data){
             String[] arrayData = new String[i.size()];
@@ -85,16 +93,36 @@ public class BasicMetadata{
         createTable(tableData, tableSchema);
     }
 
-    public void createTable(List<String> schema){
+    public BasicMetadata createTable(List<String> schema){
         StructType tableSchema = new StructType();
         for(String i : schema){
             tableSchema = tableSchema.add(i, DataTypes.StringType);
         }
-
         createTable(new ArrayList<Row>(), tableSchema);
+        return this;
     }
 
     public Dataset<Row> getTable(){ return metaTable; }
+
+    public DeltaTable getDelta(){ return metaDeltaTable.getDelta(); }
+
+    public List<String> getSchema(){
+        if(metaDeltaTable == null) throw new NullPointerException("DeltaTable is not loaded");
+        return metaDeltaTable.getListField();
+    }
+
+    public void insert(List<List<String>> data, List<String> schema){
+        if(metaTable == null) throw new NullPointerException("The metadata is not exists");
+        else if(deltaPos == null) throw new NullPointerException("The metadata position is not exists");
+        createTable(data, schema);
+        metaTable.write().format("delta").mode("append").save(deltaPos);
+        loadTable();
+    }
+
+    public void delete(String condition){
+        if(metaDeltaTable == null) throw new NullPointerException("DeltaTable is not loaded");
+        metaDeltaTable.delete(condition);
+    }
 
     public void saveTable(){
         if(metaTable == null) throw new NullPointerException("The metadata is not exists");
@@ -106,21 +134,47 @@ public class BasicMetadata{
         SparkSession mySession = SparkSession.builder().master("local[*]").appName("metadata test").config("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension").config("spark.sql.catalog.spark_catalog", "org.apache.spark.sql.delta.catalog.DeltaCatalog").getOrCreate();
         BasicMetadata myMeta = new BasicMetadata(mySession);
 
+        /*
+            * create function
+            *
+        */
+        // List<String> testSchema = new ArrayList<>(Arrays.asList("name", "age", "university"));
+        // myMeta.setPos("/tmp/metadata/firstDelta").createTable(testSchema).saveTable();
+
+        /*
+            * load function
+            *
+        */
+        myMeta.setPos("/tmp/metadata/firstDelta").load();
+        
+        /*
+            * insert function
+            *
+        */
         // List<List<String>> testData = new ArrayList<>();
         // testData.add(Arrays.asList("hiep", "21", "usth"));
-        List<String> testSchema = new ArrayList<>(Arrays.asList("name", "age", "university"));
-        myMeta.setPos("/tmp/metadata/firstDelta").createTable(testSchema);
-        myMeta.saveTable();
+        // testData.add(Arrays.asList("aback", "40", "ede"));
+        // testData.add(Arrays.asList("aquang", "3", "mongnguyen"));
+        // testData.add(Arrays.asList("hisu", "10", "japon"));
+        // myMeta.insert(testData, myMeta.getSchema());
 
-        DeltaWrapper myDelta = myMeta.loadDelta();
-        
-        // myDelta.update("id > 22", new HashMap<String, String>(){{
-        //         put("name", "Bach_gia");
-        //         put("school", "Viet phap");
+        /*
+            * update function
+            *
+        */
+        // myMeta.update("age == 3", new HashMap<String, String>(){{
+        //         put("university", "Bach_gia");
+        //         put("age", "30");
         //     }}
         // );
 
-        Dataset<Row> myDF = myDelta.getDelta().toDF();
+        /*
+            * delete function
+            *
+        */
+        // myMeta.delete("age == 30");
+
+        Dataset<Row> myDF = myMeta.getDelta().toDF();
         myDF.show();
         
         // close context
