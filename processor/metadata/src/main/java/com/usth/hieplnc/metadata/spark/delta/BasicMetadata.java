@@ -8,6 +8,9 @@ import org.apache.spark.sql.types.StructType;
 import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.DataTypes;
 
+import org.apache.spark.sql.functions;
+import org.apache.spark.sql.Column;
+
 import io.delta.tables.DeltaTable;
 
 import java.util.List;
@@ -114,9 +117,10 @@ public class BasicMetadata{
     public void insert(List<List<String>> data, List<String> schema){
         if(metaTable == null) throw new NullPointerException("The metadata is not exists");
         else if(deltaPos == null) throw new NullPointerException("The metadata position is not exists");
+        Dataset<Row> temp = metaTable;
         createTable(data, schema);
         metaTable.write().format("delta").mode("append").save(deltaPos);
-        loadTable();
+        metaTable = temp;
     }
 
     public void delete(String condition){
@@ -154,15 +158,15 @@ public class BasicMetadata{
         // List<List<String>> testData = new ArrayList<>();
         // testData.add(Arrays.asList("hiep", "21", "usth"));
         // testData.add(Arrays.asList("aback", "40", "ede"));
-        // testData.add(Arrays.asList("aquang", "3", "mongnguyen"));
-        // testData.add(Arrays.asList("hisu", "10", "japon"));
+        // testData.add(Arrays.asList("Dang A Thao", "3", "mongnguyen"));
+        // testData.add(Arrays.asList("Pham Mai Mai", "name + 3", "japon"));
         // myMeta.insert(testData, myMeta.getSchema());
 
         /*
             * update function
             *
         */
-        // myMeta.update("age == 3", new HashMap<String, String>(){{
+        // myMeta.update("name == 3", new HashMap<String, String>(){{
         //         put("university", "Bach_gia");
         //         put("age", "30");
         //     }}
@@ -172,10 +176,9 @@ public class BasicMetadata{
             * delete function
             *
         */
-        // myMeta.delete("age == 30");
+        // myMeta.delete("age == 'name + 3' ");
 
-        Dataset<Row> myDF = myMeta.getDelta().toDF();
-        myDF.show();
+        myMeta.getDelta().toDF().show();
         
         // close context
         mySession.close();
