@@ -55,6 +55,9 @@ https://hadoop.apache.org/docs/r3.2.1/
 ## XML parser
 https://www.baeldung.com/java-xml
 
+## XML parser: Object class to XML and vice versa
+https://www.vogella.com/tutorials/JAXB/article.html
+
 =======================================================================================
 # Metadata system
 ## Delta Lake

@@ -26,6 +26,7 @@
   <modules>
     <module>controller</module>
     <module>processor</module>
+    <module>common</module>
   </modules>
 
   <dependencies>
