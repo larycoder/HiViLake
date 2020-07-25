@@ -1,25 +1,23 @@
 package com.usth.hieplnc.schema;
 
 import java.sql.*;
-
 import java.io.IOException;
 import java.util.ArrayList;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.*;
 
-import org.w3c.dom.*;
-import javax.xml.parsers.*;
-import org.xml.sax.SAXException;
-
 import com.usth.hieplnc.schema.DatabaseConnection;
+
+import com.usth.hieplnc.common.xml.XMLParser;
+import com.usth.hieplnc.common.xml.model.*;
 
 public class BasicSchema{
 // variable
 
     Connection con = null;
     FileSystem fs = null;
-    Element xml = null;
+    SchemaModel xml = null;
 
     private String url = "jdbc:mariadb://kylo-mysql:3306?user=root&password=password";
     private DatabaseConnection virtualDB = null;
@@ -71,67 +69,53 @@ public class BasicSchema{
         this.fs = fs;
     }
 
-    public void loadXML(String path) throws IOException, ParserConfigurationException, SAXException{
+    public void loadXML(String path) throws IOException{
         FSDataInputStream in = null;
-        Document document = null;
+        SchemaModel document = null;
 
         try{
             // load xml file
             in = this.fs.open(new Path(path));
         
-            // get document builder
-            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder builder = factory.newDocumentBuilder();
-            
             // parse file
-            document = builder.parse(in);
+            XMLParser xmlParser = new XMLParser(in);
+            document = xmlParser.parse(SchemaModel.class);
 
             // close file
             in.close();
-        } catch(ParserConfigurationException | SAXException e){
+        } catch(NullPointerException e){
             try{
                 in.close();
             } catch(NullPointerException npe){}
             throw e;
         }
 
-        // normalize tree
-        document.getDocumentElement().normalize();
-
-        // get root file
-        this.xml = document.getDocumentElement();
+        this.xml = document;
     }
 
     public void genDatabase() throws SQLException{
         // prepare state
-        Element database = (Element) xml.getElementsByTagName("database").item(0);
+        DatabaseModel database = xml.getDatabase();
         
         // create database
-        String nameDB = database.getElementsByTagName("name").item(0).getTextContent();
-        virtualDB.createDatabase(nameDB);
-        virtualDB.useDatabase(nameDB);
+        virtualDB.createDatabase(database.getName());
+        virtualDB.useDatabase(database.getName());
 
         // create table for database
-        NodeList listTables = ((Element) database.getElementsByTagName("tables").item(0)).getElementsByTagName("table");
-        for(int i = 0; i < listTables.getLength(); i++){
-            Element table = (Element) listTables.item(i);
-            String tableName = table.getElementsByTagName("name").item(0).getTextContent();
-            
-            NodeList listColumns = table.getElementsByTagName("column");
-            ArrayList<String> columnNames = new ArrayList<String>();
-            ArrayList<String> columnTypes = new ArrayList<String>();
+        for(TableModel table : database.getTable()){
+            ArrayList<String> columnNames = new ArrayList<>();
+            ArrayList<String> columnTypes = new ArrayList<>();
 
-            for(int j = 0; j < listColumns.getLength(); j++){
-                Element column = (Element) listColumns.item(j);
-                columnNames.add(column.getElementsByTagName("name").item(0).getTextContent());
-                columnTypes.add(column.getElementsByTagName("type").item(0).getTextContent());
+            for(ColumnModel column : table.getColumn()){
+                columnNames.add(column.getName());
+                columnTypes.add(column.getType());
             }
 
-            virtualDB.createTable(tableName, columnNames, columnTypes);
+            virtualDB.createTable(table.getName(), columnNames, columnTypes);
         }
     }
 
-    public static void main( String[] args ) throws IOException, SQLException, ParserConfigurationException, SAXException{
+    public static void main( String[] args ) throws IOException, SQLException{
         BasicSchema bs = new BasicSchema();
 
         // load schema file

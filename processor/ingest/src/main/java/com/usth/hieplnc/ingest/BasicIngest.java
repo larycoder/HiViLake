@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.FileNotFoundException;
 
 import java.lang.RuntimeException;
+import java.lang.NullPointerException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,9 +15,8 @@ import java.nio.file.Paths;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.*;
 
-import org.w3c.dom.*;
-import javax.xml.parsers.*;
-import org.xml.sax.SAXException;
+import com.usth.hieplnc.common.xml.XMLParser;
+import com.usth.hieplnc.common.xml.model.*;
 
 import com.usth.hieplnc.ingest.FileFinder;
 
@@ -172,28 +172,19 @@ public class BasicIngest{
         }
     }
 
-    protected Element loadXML(String path){
+    protected InstructionModel loadXML(String path){
         // Parse XML
         // Method Variable
         FSDataInputStream in = null;
-        Element result = null;
+        InstructionModel result = null;
 
         try{
             // load XML file
             in = getFS("local").open(getAbsInput(new Path(path)));
             
-            // Get Document Builder
-            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder builder = factory.newDocumentBuilder();
-
-            // Build Document
-            Document document = builder.parse(in);
-
-            // Normalize
-            document.getDocumentElement().normalize();
-            
-            // get root node
-            result = document.getDocumentElement();
+            // parse xml data to model object
+            XMLParser xmlParser = new XMLParser(in);
+            result = xmlParser.parse(InstructionModel.class);
         } catch(Exception e){
             e.printStackTrace();
             result = null;
@@ -208,51 +199,30 @@ public class BasicIngest{
     }
 
     public void ingestFile() throws IOException{
-        Element files = loadXML(".hivilake/IOF.xml");
+        InstructionModel files = loadXML(".hivilake/IOF.xml");
 
         // get root of IO ingest
-        Path inputRoot = null;
-        Path outputRoot = null;
+        String inputRoot = null;
+        String outputRoot = null;
 
-        Element roots = (Element) files.getElementsByTagName("roots").item(0);
-        NodeList rootList = roots.getElementsByTagName("root");
-        for(int i = 0; i < rootList.getLength(); i++){
-            Element root = (Element) rootList.item(i);
-            String rootName = root.getElementsByTagName("name").item(0).getTextContent();
-            if(rootName.equals("input")){
-                String rootValue = root.getElementsByTagName("value").item(0).getTextContent();
-                inputRoot = new Path(rootValue);
-            } else if(rootName.equals("output")){
-                String rootValue = root.getElementsByTagName("value").item(0).getTextContent();
-                outputRoot = new Path(rootValue);
+        for(RootModel root : files.getRoot()){
+            if(root.getName().equals("input")){
+                inputRoot = root.getValue();
+            } else if(root.getName().equals("output")){
+                outputRoot = root.getValue();
             }
         }
 
         // following instruction
-        Element paths = (Element) files.getElementsByTagName("paths").item(0);
-        NodeList pathList = paths.getElementsByTagName("path");
-        for(int i = 0; i < pathList.getLength(); i++){
-            Element path = (Element) pathList.item(i);
-            
-            // set input path
-            String stringInputPath = path.getElementsByTagName("input").item(0).getTextContent();
-            Path inputPath = new Path(Paths.get(inputRoot.toString(), stringInputPath).toString());
-
-            // set output path
-            String stringOutputPath = path.getElementsByTagName("output").item(0).getTextContent();
-            Path outputPath = new Path(Paths.get(outputRoot.toString(), stringOutputPath).toString());
-
-            // get type
-            NodeList stringOption = path.getElementsByTagName("type");
-            String option = "both";
-            if(stringOption.getLength() > 0) option = stringOption.item(0).getTextContent();
-
-            // push file to hadoop
-            pushFile(inputPath, outputPath, this.delSrc, option);
+        for(PathModel path : files.getPath()){
+            Path inputPath = new Path(Paths.get(inputRoot, path.getInput()).toString()); // set input path
+            Path outputPath = new Path(Paths.get(outputRoot, path.getOutput()).toString()); // set output path
+            String option = path.getType() == null ? "both" : path.getType(); // set type
+            pushFile(inputPath, outputPath, this.delSrc, option); // push file to hadoop
         }
     }
 
-    public static void main(String[] args) throws IOException, ParserConfigurationException, SAXException{
+    public static void main(String[] args) throws IOException, NullPointerException{
         BasicIngest bi = new BasicIngest();
         bi.setFS("file://", "hdfs://");
         bi.setInputDir("/tmp/hieplnc/hivilake/input");
@@ -315,6 +285,13 @@ public class BasicIngest{
         // test copy to hadoop
         // FileSystem myFS = bi.getFS("hadoop");
         // myFS.copyFromLocalFile(false, bi.getAbsInput(new Path("test_path")), bi.getAbsOutput(new Path("./ee")));
+
+        // test new xml mechanism
+        XMLParser myParser = new XMLParser(bi.getFS("local").open(new Path("/tmp/hieplnc/hivilake/input/.hivilake/IOF.xml")));
+        InstructionModel myIOF = myParser.parse(InstructionModel.class);
+        for(PathModel i : myIOF.getPath()){
+            i.display();
+        }
 
         //======================================================================================================//
 
