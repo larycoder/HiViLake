@@ -287,11 +287,11 @@ public class BasicIngest{
         // myFS.copyFromLocalFile(false, bi.getAbsInput(new Path("test_path")), bi.getAbsOutput(new Path("./ee")));
 
         // test new xml mechanism
-        XMLParser myParser = new XMLParser(bi.getFS("local").open(new Path("/tmp/hieplnc/hivilake/input/.hivilake/IOF.xml")));
-        InstructionModel myIOF = myParser.parse(InstructionModel.class);
-        for(PathModel i : myIOF.getPath()){
-            i.display();
-        }
+        // XMLParser myParser = new XMLParser(bi.getFS("local").open(new Path("/tmp/hieplnc/hivilake/input/.hivilake/IOF.xml")));
+        // InstructionModel myIOF = myParser.parse(InstructionModel.class);
+        // for(PathModel i : myIOF.getPath()){
+        //     i.display();
+        // }
 
         //======================================================================================================//
 
