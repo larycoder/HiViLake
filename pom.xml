@@ -24,9 +24,9 @@
   </properties>
 
   <modules>
+    <module>common</module>
     <module>controller</module>
     <module>processor</module>
-    <module>common</module>
   </modules>
 
   <dependencies>
@@ -65,11 +65,6 @@
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-log4j12</artifactId>
       <version>1.7.25</version>
-    </dependency>
-    <dependency>
-      <groupId>org.w3c</groupId>
-      <artifactId>dom</artifactId>
-      <version>2.3.0-jaxb-1.0.6</version>
     </dependency>
     <dependency>
       <groupId>org.mariadb.jdbc</groupId>
