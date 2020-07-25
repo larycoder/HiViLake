@@ -2,7 +2,7 @@ package com.usth.hieplnc.common.xml.model;
 
 import javax.xml.bind.annotation.XmlElement;
 
-public class Root{
+public class RootModel{
     private String name;
     private String value;
 

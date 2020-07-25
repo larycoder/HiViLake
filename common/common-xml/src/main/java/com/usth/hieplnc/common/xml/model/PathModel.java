@@ -2,7 +2,7 @@ package com.usth.hieplnc.common.xml.model;
 
 import javax.xml.bind.annotation.XmlElement;
 
-public class Path{
+public class PathModel{
     private String input;
     private String output;
     private String type;
