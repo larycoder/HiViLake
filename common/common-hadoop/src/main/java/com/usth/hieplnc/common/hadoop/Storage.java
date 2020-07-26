@@ -8,6 +8,8 @@ import java.nio.file.Paths;
 
 import java.io.IOException;
 import java.io.FileNotFoundException;
+import java.io.InputStream;
+
 import java.lang.RuntimeException;
 import java.lang.NullPointerException;
 
@@ -115,8 +117,18 @@ public class Storage{
     public String getAbsInput(String file){ return getAbsInput(new Path(file)).toString(); }
     public String getAbsOutput(String file){ return getAbsOutput(new Path(file)).toString(); }
 
-    public void copyFromLocalFile(boolean delSrc, FileWrapper input, FileWrapper output) throws IOException{
-        hadoop.copyFromLocalFile(delSrc, input.getPath(), output.getPath());
+    public void copyFromLocalFile(boolean delSrc, String input, String output) throws IOException{
+        hadoop.copyFromLocalFile(delSrc, new Path(input), new Path(output));
+    }
+
+    private boolean isLocal(String location){
+        if(location.equals("local")){
+            return true;
+        } else if(location.equals("hadoop")){
+            return false;
+        } else{
+            throw new RuntimeException("Can not active file finder with option " + location);
+        }
     }
 
     public void activeFileFinder(String location){
@@ -135,16 +147,23 @@ public class Storage{
         return new FileWrapper(finder);
     }
 
+    public InputStream open(String path, String location) throws RuntimeException, IOException{
+        if(isLocal(location)){
+            return local.open(new Path(path));
+        } else{
+            return hadoop.open(new Path(path));
+        }
+    }
+
     public static void main( String[] args ) throws IOException, NullPointerException{
         Storage myStore = new Storage();
         myStore.setInputDir("/tmp/hieplnc/hivilake/input");
         myStore.setOutputDir("/user/root/hivilake/output");
         
         FileWrapper dir = new FileWrapper(myStore.getLocalFS().getFileStatus(new Path("/bin")), myStore.getLocalFS());
-        FileStatus[] listFile = dir.listStatus();
-        // FileStatus[] listFile = myStore.getLocalFS().listStatus(new Path("/bin"));
-        for(FileStatus i : listFile){
-            System.out.println(i.getPath().toString());
+        String[] listFile = dir.listStringFile();
+        for(String i : listFile){
+            System.out.println(i);
         }
 
         // close  storage

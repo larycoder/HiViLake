@@ -1,173 +1,65 @@
 package com.usth.hieplnc.ingest;
 
 import java.io.IOException;
-import java.io.FileNotFoundException;
+import java.io.InputStream;
 
 import java.lang.RuntimeException;
 import java.lang.NullPointerException;
 
-import java.util.ArrayList;
-import java.util.List;
+// import java.util.ArrayList;
+// import java.util.List;
 
-import java.net.*;
+// import java.net.*;
 import java.nio.file.Paths;
-
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.*;
 
 import com.usth.hieplnc.common.xml.XMLParser;
 import com.usth.hieplnc.common.xml.model.*;
 
-import com.usth.hieplnc.ingest.FileFinder;
+import com.usth.hieplnc.common.hadoop.Storage;
+import com.usth.hieplnc.common.hadoop.FileWrapper;
+import com.usth.hieplnc.common.hadoop.FinderResult;
 
 public class BasicIngest{
 // Variable
 
-    Configuration conf = null;
-
-    FileSystem lfs = null;
-    FileSystem hafs = null;
-
-    FileFinder finder = null;
-
-    String inputDir = null;
-    String outputDir = null;
-
-    public boolean delSrc;
+    private Storage storage = null;
+    public boolean delSrc = true;
 
 // =========================================================================================== //
 // Constructor
 
-    public BasicIngest(Configuration conf){
-        this.conf = new Configuration(conf);
-    }
-
     // factory constructor
-    public BasicIngest(){
-        // Set configuration for connecting
-        Configuration conf = new Configuration();
-        conf.set("fs.defaultFS", "hdfs://localhost:9000");
-        this.conf = new Configuration(conf);
+    public BasicIngest() throws IOException{
+        storage = new Storage();
     }
 
 // ============================================================================================ //
 // Method
 
-    public void setFS(String lfs, String hafs) throws IOException{
-        if(lfs != null){
-            if(this.lfs != null) this.lfs.close();
-            this.lfs = (new Path(lfs)).getFileSystem(conf);
-            this.finder = new FileFinder(this.lfs);
-        }
-        if(hafs != null){
-            if(this.hafs != null) this.hafs.close();
-            this.hafs = (new Path(hafs)).getFileSystem(conf);
-        }
-    }
+    public void pushFile(String input, String output, boolean delSrc, String option) throws IOException{
+        String pattern = storage.getAbsInput(input);
+        output = storage.getAbsOutput(output);
+        FileWrapper path;
 
-    public FileSystem getFS(String type){
-        if(type == "local") return this.lfs;
-        else if(type == "hadoop") return this.hafs;
-        return null;
-    }
+        FinderResult finderResult = storage.search(pattern);
 
-    public void closeFS() throws IOException{
-        if(lfs != null) lfs.close();
-        if(hafs != null) hafs.close();
-    }
-
-    public void setConf(Configuration conf){
-        this.conf = conf;
-    }
-
-    public Configuration getConf(){
-        return conf;
-    }
-
-    public void setInputDir(String input) throws IOException{
-        Path inputPath = new Path(input);
-        if(lfs.exists(inputPath)){
-            if(!lfs.getFileStatus(inputPath).isDirectory()){
-                throw new IOException("Input Path is not directory");
-            } else {
-                FileStatus[] fileStatus = lfs.listStatus(inputPath);
-                int has = 0;
-                for(FileStatus status : fileStatus){
-                    if(status.getPath().getName() != ".hivilake" && status.isDirectory()){
-                        has = 1;
-                        break;
-                    }
-                }
-                if(has == 0) throw new IOException("Input Path " + input + " is not hivilake Dir");
-            }
-            this.inputDir = input;
-            return;
-        }
-        throw new FileNotFoundException("Path file is not exists in input file system");
-    }
-
-    public String getInputDir(){
-        return this.inputDir;
-    }
-
-    public void setOutputDir(String output) throws IOException{
-        Path outputPath = new Path(output);
-        if(hafs.exists(outputPath)){
-            if(!hafs.getFileStatus(outputPath).isDirectory()){
-                throw new IOException("Output Path is not directory");
-            } else {
-                FileStatus[] fileStatus = hafs.listStatus(outputPath);
-                int has = 0;
-                for(FileStatus status : fileStatus){
-                    if(status.getPath().getName() != ".hivilake" && status.isDirectory()){
-                        has = 1;
-                        break;
-                    }
-                }
-                if(has == 0) throw new IOException("Output Path " + output + " is not hivilake Dir");
-            }
-            this.outputDir = output;
-            return;
-        }
-        throw new FileNotFoundException("Path file is not exists in output file system");
-    }
-
-    public String getOutputDir(){
-        return this.outputDir;
-    }
-
-    public Path getAbsInput(Path file){
-        return new Path(Paths.get(this.inputDir.toString(), file.toString()).toString());
-    }
-
-    public Path getAbsOutput(Path file){
-        return new Path(Paths.get(this.outputDir.toString(), file.toString()).toString());
-    }
-
-    public void pushFile(Path input, Path output, boolean delSrc, String option) throws IOException{
-        output = getAbsOutput(output);
-        input = getAbsInput(input);
-        finder.setPattern(input.toString());
-        FileStatus inputPath;
-
-        while(finder.next()){
-            inputPath = finder.getFile();
+        while(finderResult.next()){
+            path = finderResult.getFile();
             if(option.equals("file")){
-                if(inputPath.isFile()){
-                    hafs.copyFromLocalFile(delSrc, inputPath.getPath(), output);
-                } else{
-                    continue;
+                if(path.isFile()){
+                    storage.copyFromLocalFile(delSrc, path.getPath().toString(), output);
                 }
+                continue;
             } else if(option.equals("dir")){
-                if(inputPath.isDirectory()){
-                    hafs.copyFromLocalFile(delSrc, inputPath.getPath(), output);
-                } else{
-                    continue;
+                if(path.isDirectory()){
+                    storage.copyFromLocalFile(delSrc, path.getPath().toString(), output);
                 }
+                continue;
             } else if(option.equals("both")){
-                hafs.copyFromLocalFile(delSrc, inputPath.getPath(), output);
+                storage.copyFromLocalFile(delSrc, path.getPath().toString(), output);
+                continue;
             } else{
-                throw new IOException("Can not decide action for path: " + inputPath.getPath().toString());
+                throw new IOException("Can not decide action for path: " + input);
             }
         }
     }
@@ -175,12 +67,12 @@ public class BasicIngest{
     protected InstructionModel loadXML(String path){
         // Parse XML
         // Method Variable
-        FSDataInputStream in = null;
+        InputStream in = null;
         InstructionModel result = null;
 
         try{
             // load XML file
-            in = getFS("local").open(getAbsInput(new Path(path)));
+            in = storage.open(storage.getAbsInput(path), "local");
             
             // parse xml data to model object
             XMLParser xmlParser = new XMLParser(in);
@@ -201,6 +93,9 @@ public class BasicIngest{
     public void ingestFile() throws IOException{
         InstructionModel files = loadXML(".hivilake/IOF.xml");
 
+        // active file finder
+        storage.activeFileFinder("local");
+
         // get root of IO ingest
         String inputRoot = null;
         String outputRoot = null;
@@ -215,26 +110,30 @@ public class BasicIngest{
 
         // following instruction
         for(PathModel path : files.getPath()){
-            Path inputPath = new Path(Paths.get(inputRoot, path.getInput()).toString()); // set input path
-            Path outputPath = new Path(Paths.get(outputRoot, path.getOutput()).toString()); // set output path
+            String inputPath = Paths.get(inputRoot, path.getInput()).toString(); // set input path
+            String outputPath = Paths.get(outputRoot, path.getOutput()).toString(); // set output path
             String option = path.getType() == null ? "both" : path.getType(); // set type
             pushFile(inputPath, outputPath, this.delSrc, option); // push file to hadoop
         }
     }
 
+    public Storage getStorage(){ return storage; }
+
+    public void close() throws IOException{ storage.close(); }
+
     public static void main(String[] args) throws IOException, NullPointerException{
         BasicIngest bi = new BasicIngest();
-        bi.setFS("file://", "hdfs://");
-        bi.setInputDir("/tmp/hieplnc/hivilake/input");
-        bi.setOutputDir("/user/root/hivilake/output");
+        bi.getStorage().setInputDir("/tmp/hieplnc/hivilake/input");
+        bi.getStorage().setOutputDir("/user/root/hivilake/output");
+        bi.delSrc = false;
 
         // set argument from outside
         for(int i = 0; i < args.length; i++){
             String[] parameter = args[i].split("=");
 
             //set parameter
-            if(parameter[0].equals("--inputDir")) bi.setInputDir(parameter[1]);
-            else if(parameter[0].equals("--outputDir")) bi.setOutputDir(parameter[1]);
+            if(parameter[0].equals("--inputDir")) bi.getStorage().setInputDir(parameter[1]);
+            else if(parameter[0].equals("--outputDir")) bi.getStorage().setOutputDir(parameter[1]);
             else if(parameter[0].equals("--delSrc")) bi.delSrc = Boolean.parseBoolean(parameter[1]);
 
             // execute parameter
@@ -296,6 +195,6 @@ public class BasicIngest{
         //======================================================================================================//
 
         // close filesystem
-        bi.closeFS();
+        bi.close();
     }
 }

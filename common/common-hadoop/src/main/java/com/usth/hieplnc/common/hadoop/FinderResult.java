@@ -15,4 +15,5 @@ public interface FinderResult{
     public boolean next() throws FileNotFoundException, IOException; // check if file is available to get
     public FileWrapper getFile() throws IOException; // get file from file list
     public FileStatus getStatus() throws IOException; // get status from list
+    public String getStringFile() throws IOException; // get file in form of string
 }
