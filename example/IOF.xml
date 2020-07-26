@@ -22,13 +22,18 @@
         - type: file / dir / both
     -->
         <path>
-            <input>./</input>
-            <output>./</output>
-        </path>
-        <path>
-            <input>file_path</input>
+            <input>./.*</input>
             <output>./</output>
             <type>file</type>
+        </path>
+        <path>
+            <input>./test_path/.*</input>
+            <output>./</output>
+            <type>dir</type>
+        </path>
+        <path>
+            <input>hi</input>
+            <output>ok</output>
         </path>
     </paths>
 </files>
