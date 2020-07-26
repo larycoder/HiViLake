@@ -140,4 +140,7 @@ public class FileFinder{
         
         initializeStack();
     }
+
+    public FileSystem getFilesystem(){ return fs; }
+    
 }

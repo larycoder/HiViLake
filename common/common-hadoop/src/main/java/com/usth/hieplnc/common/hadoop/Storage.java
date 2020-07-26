@@ -7,9 +7,12 @@ import java.util.HashMap;
 import java.nio.file.Paths;
 
 import java.io.IOException;
+import java.io.FileNotFoundException;
 import java.lang.RuntimeException;
+import java.lang.NullPointerException;
 
 import com.usth.hieplnc.common.hadoop.FileFinder;
+import com.usth.hieplnc.common.hadoop.FinderResult;
 
 public class Storage{
 // variable
@@ -21,8 +24,6 @@ public class Storage{
     
     private String inputDir = null;
     private String outputDir = null;
-    
-    public boolean delSrc = true;
 
 //=================================================================//
 // constructor
@@ -30,14 +31,12 @@ public class Storage{
     public Storage(FileSystem local, FileSystem hadoop){
         this.local = local;
         this.hadoop = hadoop;
-        finder = new FileFinder(local);
     }
 
     public Storage(HashMap<String, String> conf, String local, String hadoop) throws IOException{
         Configuration configuration = loadConf(conf);
         this.local = (new Path(local)).getFileSystem(configuration);
         this.hadoop = (new Path(hadoop)).getFileSystem(configuration);
-        finder = new FileFinder(this.local);
     }
 
     public Storage() throws IOException{ // factory constructor
@@ -46,7 +45,6 @@ public class Storage{
         
         local = (new Path("file://")).getFileSystem(conf);
         hadoop = (new Path("hdfs://")).getFileSystem(conf);
-        finder = new FileFinder(local);
     }
 
 //=================================================================//
@@ -105,48 +103,52 @@ public class Storage{
     public String getOutputDir(){ return outputDir; }
 
     private Path getAbsInput(Path file){
+        if(inputDir == null) throw new NullPointerException("Input Root is not setted");
         return new Path(Paths.get(inputDir, file.toString()).toString());
     }
 
     private Path getAbsOutput(Path file){
+        if(outputDir == null) throw new NullPointerException("Input Root is not setted");
         return new Path(Paths.get(outputDir, file.toString()).toString());
     }
 
-    private void transferMethod(Path input, Path output) throws IOException{
-        hadoop.copyFromLocalFile(delSrc, input, output);
+    public String getAbsInput(String file){ return getAbsInput(new Path(file)).toString(); }
+    public String getAbsOutput(String file){ return getAbsOutput(new Path(file)).toString(); }
+
+    public void copyFromLocalFile(boolean delSrc, FileWrapper input, FileWrapper output) throws IOException{
+        hadoop.copyFromLocalFile(delSrc, input.getPath(), output.getPath());
     }
 
-    public void pushFile(Path input, Path output, String opt) throws IOException{
-        input = getAbsInput(input);
-        output = getAbsOutput(output);
-        finder.setPattern(input.toString());
-        FileStatus status;
-
-        while(finder.next()){
-            status = finder.getFile();
-            if(opt.equals("file")){
-                if(status.isFile()){
-                    transferMethod(status.getPath(), output);
-                }
-                continue;
-            } else if(opt.equals("dir")){
-                if(status.isDirectory()){
-                    transferMethod(status.getPath(), output);
-                }
-                continue;
-            } else if(opt.equals("both")){
-                transferMethod(status.getPath(), output);
-                continue;
-            } else{
-                throw new RuntimeException("Can not decide action for path: " + status.getPath().toString());
-            }
+    public void activeFileFinder(String location){
+        if(location.equals("local")){
+            finder = new FileFinder(local);
+        } else if(location.equals("hadoop")){
+            finder = new FileFinder(hadoop);
+        } else{
+            throw new RuntimeException("Can not active file finder with option " + location);
         }
     }
 
-    public static void main( String[] args ) throws IOException{
+    public FinderResult search(String pattern) throws FileNotFoundException, IOException{
+        if(finder == null) throw new NullPointerException("File Finder is not active");
+        finder.setPattern(pattern);
+        return new FileWrapper(finder);
+    }
+
+    public static void main( String[] args ) throws IOException, NullPointerException{
         Storage myStore = new Storage();
         myStore.setInputDir("/tmp/hieplnc/hivilake/input");
-        System.out.println(myStore.getInputDir());
+        myStore.setOutputDir("/user/root/hivilake/output");
+        
+        FileWrapper dir = new FileWrapper(myStore.getLocalFS().getFileStatus(new Path("/bin")), myStore.getLocalFS());
+        FileStatus[] listFile = dir.listStatus();
+        // FileStatus[] listFile = myStore.getLocalFS().listStatus(new Path("/bin"));
+        for(FileStatus i : listFile){
+            System.out.println(i.getPath().toString());
+        }
+
+        // close  storage
+        myStore.close();
     }
 
 }
