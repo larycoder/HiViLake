@@ -2,21 +2,21 @@ package com.usth.hieplnc.schema;
 
 import java.sql.*;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
-
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.*;
 
 import com.usth.hieplnc.schema.DatabaseConnection;
 
 import com.usth.hieplnc.common.xml.XMLParser;
 import com.usth.hieplnc.common.xml.model.*;
 
+import com.usth.hieplnc.common.hadoop.Storage;
+
 public class BasicSchema{
 // variable
 
     Connection con = null;
-    FileSystem fs = null;
+    Storage storage = null;
     SchemaModel xml = null;
 
     private String url = "jdbc:mariadb://kylo-mysql:3306?user=root&password=password";
@@ -65,17 +65,17 @@ public class BasicSchema{
         } catch(NullPointerException e){}
     }
 
-    public void setFS(FileSystem fs){
-        this.fs = fs;
+    public void setStorage(Storage storage){
+        this.storage = storage;
     }
 
-    public void loadXML(String path) throws IOException{
-        FSDataInputStream in = null;
+    public void loadXML(String path, String location) throws IOException{
+        InputStream in = null;
         SchemaModel document = null;
 
         try{
             // load xml file
-            in = this.fs.open(new Path(path));
+            in = this.storage.open(path, location);
         
             // parse file
             XMLParser xmlParser = new XMLParser(in);
@@ -115,13 +115,14 @@ public class BasicSchema{
         }
     }
 
+    public Storage getStorage(){ return storage; }
+
     public static void main( String[] args ) throws IOException, SQLException{
         BasicSchema bs = new BasicSchema();
 
         // load schema file
-        Configuration conf = new Configuration();
-        bs.setFS((new Path("file://")).getFileSystem(conf));
-        bs.loadXML("/tmp/hieplnc/hivilake/input/.hivilake/SOF.xml");
+        bs.setStorage(new Storage());
+        bs.loadXML("/user/root/hivilake/output/.hivilake/SOF.xml", "hadoop");
 
         // initialize virtual database
         bs.setVirtualDB(new DatabaseConnection(bs.getConnection()));
@@ -131,8 +132,7 @@ public class BasicSchema{
             String[] parameter = args[i].split("=");
 
             // set parameter
-            if(parameter[0].equals("--fileSystem")) bs.setFS((new Path(parameter[1])).getFileSystem(conf));
-            else if(parameter[0].equals("--schemaDir")) bs.loadXML(parameter[1]);
+            if(parameter[0].equals("--schemaDir")) bs.loadXML(parameter[1], "hadoop");
             else if(parameter[0].equals("--sqlURL")){
                 bs.setConnection(parameter[1]);
                 try{
@@ -180,5 +180,6 @@ public class BasicSchema{
 //=======================================================================================//
 
         bs.closeConnection();
+        bs.getStorage().close();
     }
 }

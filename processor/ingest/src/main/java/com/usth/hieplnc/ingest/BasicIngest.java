@@ -28,6 +28,8 @@ public class BasicIngest{
 // =========================================================================================== //
 // Constructor
 
+    public BasicIngest(Storage storage){ this.storage = storage; }
+
     // factory constructor
     public BasicIngest() throws IOException{
         storage = new Storage();
