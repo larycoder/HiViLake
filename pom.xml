@@ -2,11 +2,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>com.usth.hieplnc</groupId>
   <artifactId>hivilake</artifactId>
+  <groupId>com.usth.hieplnc</groupId>
   <version>0.1.0-SNAPSHOT</version>
   <packaging>pom</packaging>
-  <name>hivilake</name>
+
+  <name>hivilake - a datalake (storage manager) project</name>
   <!-- FIXME change it to the project's website -->
   <url>https://github.com/larycoder/HiViLake</url>
 
@@ -24,9 +25,7 @@
   </properties>
 
   <modules>
-    <module>common</module>
-    <module>controller</module>
-    <module>processor</module>
+    <module>storage</module>
   </modules>
 
   <dependencies>
