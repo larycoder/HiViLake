@@ -3,3 +3,4 @@ doc/**/*.md
 doc/**/image
 **/target
 share
+!doc/**/template.*
