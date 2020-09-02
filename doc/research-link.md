@@ -85,3 +85,7 @@ https://jaceklaskowski.gitbooks.io/mastering-spark-sql/spark-sql-DataFrame.html
 
 ## Spark: Column class explaination
 https://mungingdata.com/apache-spark/column-methods/
+
+======================================================================================
+# Json-simple doc
+http://alex-public-doc.s3.amazonaws.com/json_simple-1.1/index.html
