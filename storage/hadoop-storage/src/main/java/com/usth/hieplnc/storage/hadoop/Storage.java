@@ -1,173 +1,70 @@
 package com.usth.hieplnc.storage.hadoop;
 
+/**
+ * Doc:
+ * Hadoop Storage class implementing the storage wrapper
+ *
+ */
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.*;
 
-import java.util.HashMap;
-import java.nio.file.Paths;
-
 import java.io.IOException;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
+import java.util.List;
+import java.util.ArrayList;
 
-import java.lang.RuntimeException;
-import java.lang.NullPointerException;
+// Storage wrapper interface
+import com.usth.hieplnc.storage.api.StorageWrapper;
+import com.usth.hieplnc.storage.api.Filesystem;
 
-import com.usth.hieplnc.storage.hadoop.FileFinder;
-import com.usth.hieplnc.storage.hadoop.FinderResult;
-
-public class Storage{
+public class Storage implements StorageWrapper{
 // variable
     
-    private FileSystem local = null;
-    private FileSystem hadoop = null;
-    
-    private FileFinder finder = null;
-    
-    private String inputDir = null;
-    private String outputDir = null;
+    private final Configuration conf;
+    private final FileSystem fs;
 
 //=================================================================//
 // constructor
 
-    public Storage(FileSystem local, FileSystem hadoop){
-        this.local = local;
-        this.hadoop = hadoop;
-    }
-
-    public Storage(HashMap<String, String> conf, String local, String hadoop) throws IOException{
-        Configuration configuration = loadConf(conf);
-        this.local = (new Path(local)).getFileSystem(configuration);
-        this.hadoop = (new Path(hadoop)).getFileSystem(configuration);
-    }
-
-    public Storage() throws IOException{ // factory constructor
-        Configuration conf = new Configuration();
-        conf.set("fs.defaultFS", "hdfs://localhost:9000");
-        
-        local = (new Path("file://")).getFileSystem(conf);
-        hadoop = (new Path("hdfs://")).getFileSystem(conf);
+    public Storage(Configuration conf) throws IOException{
+        this.conf = conf;
+        this.fs = (new Path("hdfs://")).getFileSystem(this.conf);
     }
 
 //=================================================================//
 // method
-
-    private Configuration loadConf(HashMap<String, String> conf){
-        Configuration newConf = new Configuration();
-        for(String key : conf.keySet()){
-            newConf.set(key, conf.get(key));
-        }
-        return newConf;
+    @Override
+    public void setParam(String key, String value){
+        this.conf.set(key, value);
     }
 
-    public FileSystem getLocalFS(){ return local; }
-    public FileSystem getHadoopFS(){ return hadoop; }
-
-    public void close() throws IOException{
-        if(local != null) local.close();
-        if(hadoop != null) hadoop.close();
+    @Override
+    public List<String> support(){
+        List supportType = new ArrayList<String>();
+        supportType.add("filesystem");
+        supportType.add("sql");
+        return supportType;
     }
 
-    private boolean isHiviDir(FileStatus[] dir){
-        for(FileStatus status : dir){
-            if(status.getPath().getName().equals(".hivilake") && status.isDirectory()){
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public void setInputDir(String input) throws IOException{
-        Path inputPath = new Path(input);
-
-        if(! local.getFileStatus(inputPath).isDirectory()){
-            throw new IOException("Input Path is not directory");
-        } else if(! isHiviDir(local.listStatus(inputPath))){
-            throw new IOException("Input Path " + input + " is not hivilake directory");
-        }
-
-        inputDir = input;
-    }
-
-    public void setOutputDir(String output) throws IOException{
-        Path outputPath = new Path(output);
-
-        if(! hadoop.getFileStatus(outputPath).isDirectory()){
-            throw new IOException("Input Path is not directory");
-        } else if(! isHiviDir(hadoop.listStatus(outputPath))){
-            throw new IOException("Input Path " + output + " is not hivilake directory");
-        }
-
-        outputDir = output;
-    }
-
-    public String getInputDir(){ return inputDir; }
-    public String getOutputDir(){ return outputDir; }
-
-    private Path getAbsInput(Path file){
-        if(inputDir == null) throw new NullPointerException("Input Root is not setted");
-        return new Path(Paths.get(inputDir, file.toString()).toString());
-    }
-
-    private Path getAbsOutput(Path file){
-        if(outputDir == null) throw new NullPointerException("Input Root is not setted");
-        return new Path(Paths.get(outputDir, file.toString()).toString());
-    }
-
-    public String getAbsInput(String file){ return getAbsInput(new Path(file)).toString(); }
-    public String getAbsOutput(String file){ return getAbsOutput(new Path(file)).toString(); }
-
-    public void copyFromLocalFile(boolean delSrc, String input, String output) throws IOException{
-        hadoop.copyFromLocalFile(delSrc, new Path(input), new Path(output));
-    }
-
-    private boolean isLocal(String location){
-        if(location.equals("local")){
-            return true;
-        } else if(location.equals("hadoop")){
-            return false;
-        } else{
-            throw new RuntimeException("Can not active file finder with option " + location);
+    @Override
+    public void close(){
+        try{
+            fs.close();
+        } catch(IOException e){
+            ;
         }
     }
 
-    public void activeFileFinder(String location){
-        if(location.equals("local")){
-            finder = new FileFinder(local);
-        } else if(location.equals("hadoop")){
-            finder = new FileFinder(hadoop);
-        } else{
-            throw new RuntimeException("Can not active file finder with option " + location);
+    public static void main(String args[]) throws IOException{
+// test StorageWrapper
+        Configuration hadoopConf = new Configuration();
+        hadoopConf.set("fs.defaultFS", "hdfs://localhost:9000");
+        StorageWrapper myStore = new Storage(hadoopConf);
+// type of storage supported by this class
+        for(String type: myStore.support()){
+            System.out.println(type);
         }
-    }
-
-    public FinderResult search(String pattern) throws FileNotFoundException, IOException{
-        if(finder == null) throw new NullPointerException("File Finder is not active");
-        finder.setPattern(pattern);
-        return new FileWrapper(finder);
-    }
-
-    public InputStream open(String path, String location) throws RuntimeException, IOException{
-        if(isLocal(location)){
-            return local.open(new Path(path));
-        } else{
-            return hadoop.open(new Path(path));
-        }
-    }
-
-    public static void main( String[] args ) throws IOException, NullPointerException{
-        Storage myStore = new Storage();
-        myStore.setInputDir("/tmp/hieplnc/hivilake/input");
-        myStore.setOutputDir("/user/root/hivilake/output");
-        
-        FileWrapper dir = new FileWrapper(myStore.getLocalFS().getFileStatus(new Path("/bin")), myStore.getLocalFS());
-        String[] listFile = dir.listStringFile();
-        for(String i : listFile){
-            System.out.println(i);
-        }
-
-        // close  storage
         myStore.close();
+//=====================================================================//
     }
-
 }
