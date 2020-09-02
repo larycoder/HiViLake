@@ -7,6 +7,8 @@ package com.usth.hieplnc.storage.api.filesystem;
  * 
  */
 
+import java.util.Iterator;
+
 import org.json.simple.JSONObject;
 
 import com.usth.hieplnc.storage.api.StorageWrapper;
@@ -20,5 +22,5 @@ public interface FilesystemWrapper extends StorageWrapper{
     public void deletePath(String path, SWOption option);
     public SWFile openFile(String path);
     public SWFilestatus getStatus(String path);
-    public SWListPath searchFile(JSONObject pattern); // not yet finished
+    public Iterator<SWFilestatus> searchFile(JSONObject pattern);
 }
