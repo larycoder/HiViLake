@@ -9,7 +9,7 @@ package com.usth.hieplnc.storage.api.filesystem.model;
 public class SWOption{
 // variable
     public static final int ALL = 0;
-    public static final int Empty = 1;
+    public static final int EMPTY = 1;
 
 //=================================================================//
 // constructor

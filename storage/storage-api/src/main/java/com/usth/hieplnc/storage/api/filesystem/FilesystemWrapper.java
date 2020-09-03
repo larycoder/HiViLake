@@ -8,6 +8,7 @@ package com.usth.hieplnc.storage.api.filesystem;
  */
 
 import java.util.Iterator;
+import java.io.IOException;
 
 import org.json.simple.JSONObject;
 
@@ -18,9 +19,10 @@ import com.usth.hieplnc.storage.api.filesystem.SWFile;
 import com.usth.hieplnc.storage.api.filesystem.SWFilestatus;
 
 public interface FilesystemWrapper extends StorageWrapper{
-    public void createPath(String path, PathType type);
-    public void deletePath(String path, SWOption option);
-    public SWFile openFile(String path);
-    public SWFilestatus getStatus(String path);
-    public Iterator<SWFilestatus> searchFile(JSONObject pattern);
+    public void createPath(String path, int type) throws IOException;
+    public void deletePath(String path, int option) throws IOException;
+    public SWFile openFile(String path) throws IOException;
+    public SWFilestatus getStatus(String path) throws IOException;
+    public Iterator<SWFilestatus> searchFile(JSONObject pattern) throws IOException;
+    public SWListPath listStatus(SWFilestatus fstatus) throws IOException;
 }

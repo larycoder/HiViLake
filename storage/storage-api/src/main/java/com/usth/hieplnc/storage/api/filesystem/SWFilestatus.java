@@ -6,11 +6,12 @@ package com.usth.hieplnc.storage.api.filesystem;
  * 
  */
 
+import java.io.IOException;
+
 import com.usth.hieplnc.storage.api.filesystem.SWListPath;
 
 public interface SWFilestatus{
     public boolean isFile();
     public boolean isDir();
     public String getPath();
-    public SWListPath listStatus();
 }

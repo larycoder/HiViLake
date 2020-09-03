@@ -6,10 +6,11 @@ import org.apache.hadoop.fs.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
-public class FileFinder{
+public class FileFinder implements Iterator{
 // variable
 
     RegexFile regexPattern;
@@ -112,7 +113,7 @@ public class FileFinder{
         return popStack(lastStack);
     }
 
-    public boolean next() throws FileNotFoundException, IOException{
+    public boolean notNone() throws FileNotFoundException, IOException{
         if(lastStack.isEmpty()){
             int depth = pathStack.size() - 1;
             if(depth == 0) return false;
@@ -143,4 +144,22 @@ public class FileFinder{
 
     public FileSystem getFilesystem(){ return fs; }
     
+    /**
+     * Override method to use Iterator Interface
+     *
+     */
+
+    @Override
+    public boolean hasNext(){
+        try{
+            return this.notNone();
+        } catch(IOException e){
+            return false;
+        }
+    }
+
+    @Override
+    public FileStatus next(){
+        return this.getFile();
+    }
 }

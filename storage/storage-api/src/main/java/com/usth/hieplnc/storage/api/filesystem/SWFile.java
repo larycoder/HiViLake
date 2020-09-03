@@ -8,9 +8,10 @@ package com.usth.hieplnc.storage.api.filesystem;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.IOException;
 
 public interface SWFile{
-    public InputStream readStream();
-    public void append(InputStream streamData);
-    public OutputStream writeStream();
+    public InputStream readStream() throws IOException;
+    public void append(InputStream streamData) throws IOException;
+    public void writeStream(InputStream streamData) throws IOException;
 }

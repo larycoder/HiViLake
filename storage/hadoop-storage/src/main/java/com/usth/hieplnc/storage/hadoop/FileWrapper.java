@@ -1,87 +1,74 @@
 package com.usth.hieplnc.storage.hadoop;
 
-import com.usth.hieplnc.storage.hadoop.FinderResult;
-import com.usth.hieplnc.storage.hadoop.FileFinder;
-
-import java.io.IOException;
-import java.io.FileNotFoundException;
+/**
+ * Doc:
+ * FileWrapper represent the file in hadoop filesystem
+ *
+ */
 
 import org.apache.hadoop.fs.*;
 
-public class FileWrapper extends FileStatus implements FinderResult{
-// variable
+import java.io.InputStream;
+import java.io.IOException;
 
-    private FileFinder finder = null;
-    private FileSystem fs = null;
+// Storage wrapper interface
+import com.usth.hieplnc.storage.api.filesystem.SWFile;
 
-//=============================================================//
+public class FileWrapper implements SWFile{
+// vairable
+
+    private final FileSystem fs;
+    private final Path path;
+
+//=================================================================//
 // constructor
 
-    public FileWrapper(FileFinder finder){
-        this.finder = finder;
-        this.fs = finder.getFilesystem();
-    }
-
-    public FileWrapper(FileStatus status, FileSystem fs) throws IOException{
-        super(status);
+    public FileWrapper(FileSystem fs, Path path) throws IOException{
         this.fs = fs;
+
+        if(this.fs.getFileStatus(path).isDirectory() == true){
+            throw new IOException("Class requests the path is File not Dir");
+        }
+
+        this.path = path;
     }
 
-//=============================================================//
+//=================================================================//
 // method
 
     @Override
-    public boolean next() throws FileNotFoundException, IOException{
-        if(finder == null) throw new NullPointerException("FileFinder is not exists");
-        return finder.next();
+    public InputStream readStream() throws IOException{
+        return this.fs.open(this.path);
     }
 
     @Override
-    public FileWrapper getFile() throws IOException{
-        if(finder == null) throw new NullPointerException("FileFinder is not exists");
-        return new FileWrapper(finder.getFile(), finder.getFilesystem());
-    }
+    public void append(InputStream streamData) throws IOException{
+        FSDataOutputStream appendData = this.fs.append(this.path);
+        byte[] buffer = new byte[1024]; // middle buffer to transfer data
+        int len = 0;
 
-    @Override
-    public FileStatus getStatus() throws IOException{
-        if(finder == null) throw new NullPointerException("FileFinder is not exists");
-        return finder.getFile();
-    }
-
-    @Override
-    public String getStringFile() throws IOException{
-        if(finder == null) throw new NullPointerException("FileFinder is not exists");
-        return finder.getFile().getPath().toString();
-    }
-
-    public FileWrapper[] listFile() throws FileNotFoundException, IOException{
-        FileStatus[] listStatus = fs.listStatus(getPath());
-        FileWrapper[] listWrapper = new FileWrapper[listStatus.length];
-        // Path need to improve
-        //==========================================================================//
-        for(int i = 0; i < listStatus.length; i++){
-            listWrapper[i] = new FileWrapper(listStatus[i], fs);
+        // transfer data from input steam to file
+        while((len = streamData.read(buffer)) > 0){
+            appendData.write(buffer, 0, len);
         }
-        //==========================================================================//
-        return listWrapper;
+        appendData.hflush();
+        appendData.hsync();
+        appendData.close();
     }
 
-    public FileStatus[] listStatus() throws FileNotFoundException, IOException{
-        return fs.listStatus(getPath());
-    }
+    @Override
+    public void writeStream(InputStream streamData) throws IOException{
+        FSDataOutputStream writeData = this.fs.create(this.path);
+        byte[] buffer = new byte[1024]; // middle buffer to transfer data
+        int len = 0;
 
-    public String[] listStringFile() throws FileNotFoundException, IOException{
-        FileStatus[] listStatus = fs.listStatus(getPath());
-        String[] listString = new String[listStatus.length];
-        // Path need to improve
-        //==========================================================================//
-        for(int i = 0; i < listStatus.length; i++){
-            listString[i] = new String(listStatus[i].getPath().toString());
+        // transfer data
+        while((len = streamData.read(buffer)) > 0){
+            writeData.write(buffer, 0, len);
         }
-        //==========================================================================//
-        return listString;
+        writeData.hflush();
+        writeData.hsync();
+        writeData.close();
     }
-
-    public FileSystem getFilesystem(){ return fs; }
 
 }
