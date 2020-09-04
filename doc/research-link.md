@@ -89,3 +89,12 @@ https://mungingdata.com/apache-spark/column-methods/
 ======================================================================================
 # Json-simple doc
 http://alex-public-doc.s3.amazonaws.com/json_simple-1.1/index.html
+
+======================================================================================
+# Junit 4&5
+
+## Introduction
+https://www.vogella.com/tutorials/JUnit/article.html
+
+## Junit 4 tutorial
+https://www.javaguides.net/p/junit-4.html
