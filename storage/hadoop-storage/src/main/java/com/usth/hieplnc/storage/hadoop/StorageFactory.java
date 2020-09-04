@@ -14,6 +14,7 @@ import org.json.simple.JSONObject;
 
 import java.util.Map;
 import java.util.Set;
+import java.util.Iterator;
 import java.io.IOException;
 
 // Storage Wrapper interface
@@ -49,7 +50,11 @@ public class StorageFactory{
 
     public JSONObject getParam(){
         JSONObject jsonParam = new JSONObject();
-        jsonParam.putAll((Map)this.conf);
+        Iterator<Map.Entry<String, String>> conf = this.conf.iterator();
+        while(conf.hasNext()){
+            Map.Entry<String, String> element = conf.next();
+            jsonParam.put(element.getKey(), element.getValue());
+        }
         return jsonParam;
     }
 
