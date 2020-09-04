@@ -10,6 +10,9 @@ import java.util.Iterator;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
+import com.usth.hieplnc.storage.api.filesystem.SWFilestatus;
+import com.usth.hieplnc.storage.hadoop.FilestatusWrapper;
+
 public class FileFinder implements Iterator{
 // variable
 
@@ -159,7 +162,7 @@ public class FileFinder implements Iterator{
     }
 
     @Override
-    public FileStatus next(){
-        return this.getFile();
+    public SWFilestatus next(){
+        return new FilestatusWrapper(this.getFile());
     }
 }
