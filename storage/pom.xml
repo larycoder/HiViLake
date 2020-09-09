@@ -17,7 +17,6 @@
   <modules>
     <module>hadoop-storage</module>
     <module>storage-api</module>
-    <module>storage-exception</module>
   </modules>
 
   <dependencies>
