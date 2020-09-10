@@ -38,6 +38,13 @@
       <version>3.2.1</version>
     </dependency>
 
+    <!-- dependency for csv parser -->
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-csv</artifactId>
+      <version>1.8</version>
+    </dependency>
+
     <!-- api of storage wrapper -->
     <dependency>
       <groupId>com.usth.hieplnc</groupId>

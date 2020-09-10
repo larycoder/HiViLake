@@ -33,7 +33,8 @@ public class SqlFunc{
 
     public SqlFunc orderBy(String col, int opt){
         this.orderByValue = new JSONObject();
-        this.orderByValue.put(col, opt);
+        this.orderByValue.put("fields", col);
+        this.orderByValue.put("option", opt);
         return this;
     }
 
@@ -65,10 +66,16 @@ public class SqlFunc{
     }
 
     public boolean getWhere(JSONObject row) throws HVSqlConditionException{
+        if(this.whereValue == null){
+            return true;
+        }
         return this.whereValue.check(row);
     }
 
     public boolean getHaving(JSONObject row) throws HVSqlConditionException{
+        if(this.havingValue == null){
+            return true;
+        }
         return this.havingValue.check(row);
     }
 }

@@ -26,6 +26,7 @@ public class Col implements SqlCondition{
     private final String name;
     private String alias;
     private String type;
+    private int dataType;
 
     private String eqValue = null;
     private String gtValue = null;
@@ -35,9 +36,10 @@ public class Col implements SqlCondition{
 
 //========================================================//
 // constructor
-    public Col(String name, String type){
+    public Col(String name, String type, int dataType){
         this.name = name;
         this.type = type;
+        this.dataType = dataType;
     }
 
 //========================================================//
@@ -72,15 +74,27 @@ public class Col implements SqlCondition{
     private boolean checkString(String dataValue) throws HVSqlConditionException{
         String value = dataValue;
 
+        // expression operator
+        boolean exprOpt = false;
+
         if(this.eqValue != null){
-            if(!this.eqValue.equals(value)) return false;
+            if(this.eqValue.equals(value)){
+                exprOpt = true;
+            }
         }
         if(this.gtValue != null){
-            throw new HVSqlConditionException("Field " + this.name + " is String and does not support \">\" operator");
+            if(this.gtValue.compareTo(value) <= 0){
+                exprOpt = true;
+            }
         }
         if(this.ltValue != null){
-            throw new HVSqlConditionException("Field " + this.name + " is String and does not support \"<\" operator");
+            if(this.gtValue.compareTo(value) >= 0){
+                exprOpt = true;
+            }
         }
+        if(exprOpt == false) return false;
+
+        // in operator
         if(this.inValue != null){
             int skip = 0;
             for(String strEl: (List<String>) this.inValue){
@@ -88,6 +102,8 @@ public class Col implements SqlCondition{
             }
             if(skip != 1) return false;
         }
+
+        // like operator
         if(this.likeValue != null){
             if(!this.likeValue.equals(value)) return false;
         }
@@ -99,18 +115,24 @@ public class Col implements SqlCondition{
         try{
             int value = Integer.parseInt(dataValue);
             
+            // expression operator
+            boolean exprOpt = false;
+
             if(this.eqValue != null){
                 int eqValue = Integer.parseInt(this.eqValue);
-                if(!(eqValue == value)) return false;
+                if(eqValue == value) exprOpt = true;
             }
             if(this.gtValue != null){
                 int gtValue = Integer.parseInt(this.gtValue);
-                if(!(gtValue < value)) return false;
+                if(gtValue < value) exprOpt = true;
             }
             if(this.ltValue != null){
                 int ltValue = Integer.parseInt(this.ltValue);
-                if(!(ltValue > value)) return false;
+                if(ltValue > value) exprOpt =  true;
             }
+            if(exprOpt == false) return false;
+            
+            // in operator
             if(this.inValue != null){
                 int skip = 0;
                 for(String el: (List<String>) this.inValue){
@@ -119,6 +141,8 @@ public class Col implements SqlCondition{
                 }
                 if(!(skip == 1)) return false;
             }
+
+            // like operator
             if(this.likeValue != null){
                 throw new HVSqlConditionException("Field " + this.name + " is Integer and does not support LIKE operator");
             }
@@ -133,18 +157,24 @@ public class Col implements SqlCondition{
         try{
             float value = Float.parseFloat(dataValue);
             
+            // expression operator
+            boolean exprOpt = false;
+
             if(this.eqValue != null){
                 float eqValue = Float.parseFloat(this.eqValue);
-                if(!(eqValue == value)) return false;
+                if(eqValue == value) exprOpt = true;
             }
             if(this.gtValue != null){
                 float gtValue = Float.parseFloat(this.gtValue);
-                if(!(gtValue < value)) return false;
+                if(gtValue < value) exprOpt = true;
             }
             if(this.ltValue != null){
                 float ltValue = Float.parseFloat(this.ltValue);
-                if(!(ltValue > value)) return false;
+                if(ltValue > value) exprOpt = true;
             }
+            if(exprOpt == false) return false;
+
+            // in operator
             if(this.inValue != null){
                 float skip = 0;
                 for(String el: (List<String>) this.inValue){
@@ -153,6 +183,8 @@ public class Col implements SqlCondition{
                 }
                 if(!(skip == 1)) return false;
             }
+
+            // like operator
             if(this.likeValue != null){
                 throw new HVSqlConditionException("Field " + this.name + " is Float and does not support LIKE operator");
             }
@@ -186,6 +218,22 @@ public class Col implements SqlCondition{
             default:
                 throw new HVSqlConditionException("Field " + this.name + " has unrecognized type");
         }
+    }
+
+    public String getName(){
+        return this.name;
+    }
+
+    public String getAlias(){
+        return this.alias;
+    }
+
+    public String getType(){
+        return this.type;
+    }
+
+    public int getDataType(){
+        return this.dataType;
     }
 
     @Override

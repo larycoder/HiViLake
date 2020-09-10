@@ -2,19 +2,19 @@ package com.usth.hieplnc.storage.api.sql;
 
 /**
  * Doc:
- * - Sql Exception: the field is not exists
+ * - Sql Exception: type incompatible
  *
  */
 
 import com.usth.hieplnc.storage.api.sql.HVSqlException;
 
-public class HVSqlConditionException extends HVSqlException{
+public class HVSqlIncompatibleException extends HVSqlException{
 // variable
 
 //========================================================//
 // constructor
-    public HVSqlConditionException(String message){
-        super("Hivilake Sql Condition Exception (code 0): " + message);
+    public HVSqlIncompatibleException(String message){
+        super("Hivilake Sql Incompatible Exception (code 2): " + message);
     }
 //========================================================//
 // method

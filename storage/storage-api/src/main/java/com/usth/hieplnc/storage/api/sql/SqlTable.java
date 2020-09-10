@@ -8,12 +8,14 @@ package com.usth.hieplnc.storage.api.sql;
  */
 
 import java.util.List;
+import java.io.IOException;
 
 import org.json.simple.JSONObject;
 
 import com.usth.hieplnc.storage.api.sql.SqlResult;
 import com.usth.hieplnc.storage.api.sql.SqlCondition;
 import com.usth.hieplnc.storage.api.sql.SqlFunc;
+import com.usth.hieplnc.storage.api.sql.HVSqlException;
 
 public interface SqlTable{
     public JSONObject getMeta();
@@ -23,11 +25,11 @@ public interface SqlTable{
     public SqlTable delete(SqlCondition condition);
     public SqlTable alterCol(String name, int option, JSONObject extra);
     public SqlTable select(List<Col> col, SqlFunc condition);
-    public SqlTable join(SqlTable table);
-    public SqlTable leftJoin(SqlTable table);
-    public SqlTable rightJoin(SqlTable table);
-    public SqlTable fullJoin(SqlTable table);
+    public SqlTable join(SqlTable table, String leftCol, String rightCol);
+    public SqlTable leftJoin(SqlTable table, String leftCol, String rightCol);
+    public SqlTable rightJoin(SqlTable table, String leftCol, String rightCol);
+    public SqlTable fullJoin(SqlTable table, String leftCol, String rightCol);
     public SqlTable union(SqlTable table);
     public SqlTable unionAll(SqlTable table);
-    public SqlResult commit();
+    public SqlResult commit() throws HVSqlException,IOException;
 }

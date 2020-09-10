@@ -47,7 +47,7 @@ public class SqlExpr implements SqlCondition{
                     checkResult = (checkResult && value.check(row));
                 }
             }
-        } else{
+        } else if(this.orValue != null){
             for(SqlCondition value: this.orValue){
                 if(checkResult == null){
                     checkResult = value.check(row);
@@ -55,6 +55,8 @@ public class SqlExpr implements SqlCondition{
                     checkResult = (checkResult || value.check(row));
                 }
             }
+        } else{
+            return true;
         }
 
         return checkResult;

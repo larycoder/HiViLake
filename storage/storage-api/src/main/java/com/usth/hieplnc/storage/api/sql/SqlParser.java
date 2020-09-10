@@ -6,11 +6,11 @@ package com.usth.hieplnc.storage.api.sql;
  * 
  */
 
+import java.io.IOException;
+
 import org.json.simple.JSONObject;
 
-import com.usth.hieplnc.storage.api.sql.SqlTable;
-
 public interface SqlParser{
-    public void save(String path, String name, JSONObject schema, JSONObject data);
-    public SqlTable load(String path);
+    public void save(String path, String name, JSONObject schema, JSONObject data) throws IOException;
+    public JSONObject load(String path) throws IOException;
 }

@@ -23,12 +23,6 @@ import com.usth.hieplnc.storage.api.filesystem.model.*;
 import com.usth.hieplnc.storage.hadoop.FileWrapper;
 import com.usth.hieplnc.storage.hadoop.FileFinder;
 
-/**
- * WRANNING:
- * - Missing Exception handler in "close" method
- *
- */
-
 public class Storage implements FilesystemWrapper{
 // variable
     
@@ -141,6 +135,5 @@ public class Storage implements FilesystemWrapper{
             System.out.println(type);
         }
         myStore.close();
-//=====================================================================//
     }
 }

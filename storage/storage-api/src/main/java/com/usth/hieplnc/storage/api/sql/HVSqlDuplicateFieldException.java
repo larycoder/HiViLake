@@ -2,19 +2,19 @@ package com.usth.hieplnc.storage.api.sql;
 
 /**
  * Doc:
- * - Sql Exception: the field is not exists
+ * - Sql Exception: the field is duplicate
  *
  */
 
 import com.usth.hieplnc.storage.api.sql.HVSqlException;
 
-public class HVSqlConditionException extends HVSqlException{
+public class HVSqlDuplicateFieldException extends HVSqlException{
 // variable
 
 //========================================================//
 // constructor
-    public HVSqlConditionException(String message){
-        super("Hivilake Sql Condition Exception (code 0): " + message);
+    public HVSqlDuplicateFieldException(String message){
+        super("Hivilake Sql Duplicate Field Exception (code 1): " + message);
     }
 //========================================================//
 // method
