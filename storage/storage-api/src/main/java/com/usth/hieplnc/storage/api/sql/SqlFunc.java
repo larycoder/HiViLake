@@ -61,7 +61,7 @@ public class SqlFunc{
         return this.orderByValue;
     }
 
-    public int getLimit(){
+    public Integer getLimit(){
         return this.limitValue;
     }
 

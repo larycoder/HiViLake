@@ -110,12 +110,12 @@ public class FsMetaFileParser implements SqlParser{
 
             for(FileStatus status: listStatus){
                 List<String> row = new ArrayList<String>();
-                row.add(filePath.getName());
+                row.add(status.getPath().getName());
                 row.add(status.isFile() ? "file" : "dir");
-                row.add(filePath.toString());
+                row.add(status.getPath().toString());
                 row.add(Integer.toString(filePath.hashCode()));
-                row.add(filePath.isAbsolute() ? "1" : "0");
-                row.add(filePath.isRoot() ? "1" : "0");
+                row.add(status.getPath().isAbsolute() ? "1" : "0");
+                row.add(status.getPath().isRoot() ? "1" : "0");
                 row.add(Long.toString(status.getAccessTime()));
                 row.add(Long.toString(status.getBlockSize()));
                 row.add(status.getGroup());
