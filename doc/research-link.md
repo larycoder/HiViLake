@@ -98,3 +98,6 @@ https://www.vogella.com/tutorials/JUnit/article.html
 
 ## Junit 4 tutorial
 https://www.javaguides.net/p/junit-4.html
+
+## Apache common-csv
+https://www.callicoder.com/java-read-write-csv-file-apache-commons-csv/
