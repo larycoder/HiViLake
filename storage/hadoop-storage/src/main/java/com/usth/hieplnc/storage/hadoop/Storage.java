@@ -256,6 +256,8 @@ public class Storage implements FilesystemWrapper, SqlWrapper{
             SqlTable unionTable = test.use(result);
             unionTable.select(listCol, new SqlFunc());
             result = unionTable.commit();
+
+            test.addTable("/", "directory", result, test.getParser(0));
         } catch(Exception e){
             test.close();
             e.printStackTrace();

@@ -24,6 +24,7 @@ import org.json.simple.JSONObject;
 import com.usth.hieplnc.storage.api.sql.SqlParser;
 import com.usth.hieplnc.storage.api.filesystem.FilesystemWrapper;
 import com.usth.hieplnc.storage.api.filesystem.SWFile;
+import com.usth.hieplnc.storage.api.filesystem.model.*;
 
 /**
  * WARNNING:
@@ -46,9 +47,9 @@ public class CSVFileParser implements SqlParser{
     @Override
     public void save(String path, String name, JSONObject schema, JSONObject data) throws IOException{
         // setup
-        List fieldList = (List<String>) schema.get("fields");
-        String[] fields = (String[]) fieldList.toArray();
-        List rowList = (List<List<String>>) data.get("data");
+        List<String> fieldList = (List<String>) schema.get("fields");
+        String[] fields = fieldList.toArray(new String[0]);
+        List<List<String>> rowList = (List<List<String>>) data.get("data");
         StringBuffer file = new StringBuffer();
 
         // push data to file
@@ -59,6 +60,8 @@ public class CSVFileParser implements SqlParser{
         printer.flush();
 
         // save file
+        String pathFile = (path.charAt(path.length() - 1) == '/') ? path + name + ".csv" : path + "/" + name + ".csv";
+        this.fs.createPath(path + "/" + name + ".csv", PathType.FILE);
         this.fs.openFile(path + "/" + name + ".csv").writeStream(new ByteArrayInputStream(file.toString().getBytes()));
     }
 
