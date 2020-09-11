@@ -49,6 +49,7 @@ public class FsMetaFileParser implements SqlParser{
             // build fields
             List<String> fields = new ArrayList<String>();
             fields.add("name");
+            fields.add("type");
             fields.add("path");
             fields.add("code");
             fields.add("isAbsolute");
@@ -65,11 +66,12 @@ public class FsMetaFileParser implements SqlParser{
 
             // build data
             List<String> row = new ArrayList<String>();
-            row.add(filePath.getName());
-            row.add(filePath.toString());
-            row.add(Integer.toString(filePath.hashCode()));
-            row.add(filePath.isAbsolute() ? "1" : "0");
-            row.add(filePath.isRoot() ? "1" : "0");
+            row.add(pathStatus.getPath().getName());
+            row.add("file");
+            row.add(pathStatus.getPath().toString());
+            row.add(Integer.toString(pathStatus.getPath().hashCode()));
+            row.add(pathStatus.getPath().isAbsolute() ? "1" : "0");
+            row.add(pathStatus.getPath().isRoot() ? "1" : "0");
             row.add(Long.toString(pathStatus.getAccessTime()));
             row.add(Long.toString(pathStatus.getBlockSize()));
             row.add(pathStatus.getGroup());

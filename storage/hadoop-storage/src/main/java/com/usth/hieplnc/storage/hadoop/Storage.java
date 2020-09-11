@@ -226,43 +226,51 @@ public class Storage implements FilesystemWrapper, SqlWrapper{
         deletePath(path, SWOption.ALL);
     }
 
+    /**
+     * Test: because the limit of time, testing will appear in here
+     *
+     */
     public static void main(String args[]) throws IOException, HVSqlException{
+        // open storage
         Configuration conf = new Configuration();
         conf.set("fs.defaultFS", "hdfs://localhost:9000");
         conf.set("dfs.replication", "1");
         Storage test = new Storage(conf);
 
+        // prepare table
         JSONObject extra = new JSONObject();
         extra.put("tableName", "test");
         extra.put("parser", test.FsMetaParser);
-        SqlTable dirTable = test.use("/", extra);
+        SqlTable dirTable = test.use("/spark-logs", extra);
 
+        // choose column
         Col nameCol = new Col("name", ColType.REAL, DataType.STRING);
+        Col typeCol = new Col("type", ColType.REAL, DataType.STRING);
         Col pathCol = new Col("path", ColType.REAL, DataType.STRING);
         List<Col> listCol = new ArrayList<Col>();
         listCol.add(nameCol);
+        listCol.add(typeCol);
         listCol.add(pathCol);
 
-        JSONObject extra2 = new JSONObject();
-        extra2.put("tableName", "test2");
-        extra2.put("parser", test.FsMetaParser);
-        SqlTable dirTable2 = test.use("/", extra2);
-        dirTable.unionAll(dirTable2);
+        // condition
+        typeCol.eq("file");
+        SqlFunc whereCondition = new SqlFunc();
+        whereCondition.where(typeCol);
 
+        // query
+        dirTable.select(listCol, whereCondition);
+
+        // commit
         SqlResult result;
-
         try{
             result = dirTable.commit();
-            SqlTable unionTable = test.use(result);
-            unionTable.select(listCol, new SqlFunc());
-            result = unionTable.commit();
-
-            test.addTable("/", "directory", result, test.getParser(0));
         } catch(Exception e){
             test.close();
             e.printStackTrace();
             return;
         }
+
+        // print result
         List<String> fields = (List<String>) result.getSchema().get("fields");
         List<List<String>> data = (List<List<String>>) result.getData().get("data");
         for(String field: fields){
@@ -276,6 +284,8 @@ public class Storage implements FilesystemWrapper, SqlWrapper{
             }
         }
         System.out.println("");
+
+        // close
         test.close();
     }
 }
