@@ -61,8 +61,11 @@ public class CSVFileParser implements SqlParser{
 
         // save file
         String pathFile = (path.charAt(path.length() - 1) == '/') ? path + name + ".csv" : path + "/" + name + ".csv";
-        this.fs.createPath(path + "/" + name + ".csv", PathType.FILE);
-        this.fs.openFile(path + "/" + name + ".csv").writeStream(new ByteArrayInputStream(file.toString().getBytes()));
+        if(!this.fs.exists(pathFile)){
+            this.fs.createPath(pathFile, PathType.FILE);
+        }
+
+        this.fs.openFile(pathFile).writeStream(new ByteArrayInputStream(file.toString().getBytes()));
     }
 
     @Override

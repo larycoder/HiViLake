@@ -22,6 +22,7 @@ public interface FilesystemWrapper extends StorageWrapper{
     public void createPath(String path, int type) throws IOException;
     public void deletePath(String path, int option) throws IOException;
     public SWFile openFile(String path) throws IOException;
+    public boolean exists(String path) throws IOException;
     public SWFilestatus getStatus(String path) throws IOException;
     public Iterator<SWFilestatus> searchFile(JSONObject pattern) throws IOException;
     public SWListPath listStatus(SWFilestatus fstatus) throws IOException;

@@ -38,6 +38,7 @@ public class Storage implements FilesystemWrapper, SqlWrapper{
     private FileFinder searchEngine;
     
     private JSONObject parsers;
+    private List<Integer> parserCode;
 
 //=================================================================//
 // constructor
@@ -48,18 +49,30 @@ public class Storage implements FilesystemWrapper, SqlWrapper{
 
         this.searchEngine = new FileFinder(this.fs);
 
-        // add sql parser
+        // build sql parser
         List<String> parserList = new ArrayList<String>();
         parserList.add(this.CSVParser);
         parserList.add(this.FsMetaParser);
         parserList.add(this.VirtualParser);
-
         this.parsers = new JSONObject();
         this.parsers.put("parser", parserList);
+
+        // build sql parser code
+        this.parserCode = new ArrayList<Integer>();
+        this.parserCode.add(0);
+        this.parserCode.add(50);
+        this.parserCode.add(100);
     }
 
 //=================================================================//
 // method
+    private JSONObject genParserJson(String parserName, int parserCode){
+        JSONObject parser = new JSONObject();
+        parser.put("parser", parserName);
+        parser.put("code", parserCode);
+        return parser;
+    }
+
     @Override
     public void setParam(String key, String value){
         this.conf.set(key, value);
@@ -117,6 +130,12 @@ public class Storage implements FilesystemWrapper, SqlWrapper{
     public SWFile openFile(String path) throws IOException{
         return new FileWrapper(this.fs, new Path(path));
     }
+
+    @Override
+    public boolean exists(String path) throws IOException{
+        Path pathFile = new Path(path);
+        return this.fs.exists(pathFile);
+    }
     
     @Override
     public SWFilestatus getStatus(String path) throws IOException{
@@ -144,13 +163,22 @@ public class Storage implements FilesystemWrapper, SqlWrapper{
 
     @Override
     public List<JSONObject> listParser(){
-        List<JSONObject> result = new ArrayList<JSONObject>();
-        result.add(this.parsers);
-        return result;
+        // build parser list
+        List<JSONObject> parserList = new ArrayList<JSONObject>();
+        List<String> parsers = (List<String>) this.parsers.get("parser");
+        for(int i = 0; i < parsers.size(); i++){
+            parserList.add(genParserJson(parsers.get(i), this.parserCode.get(i)));
+        }
+        return parserList;
     }
 
     @Override
     public SqlParser getParser(int index){
+        // get index from code
+        int code = index;
+        index = this.parserCode.indexOf(code);
+
+        // get parser
         List<String> parsers = (List<String>) this.parsers.get("parser");
         String parser = parsers.get(index);
         if(parser.equals(this.CSVParser)){
@@ -166,13 +194,18 @@ public class Storage implements FilesystemWrapper, SqlWrapper{
 
     @Override
     public SqlTable use(String path, JSONObject extra){
-        String parser = null;
+        SqlParser parser = null;
         String tableName = null;
 
         // get parser provided
         if(extra != null){
             if(extra.containsKey("parser")){
-                parser = (String) extra.get("parser");
+                String parserString = (String) extra.get("parser");
+                List<String> parsers = (List<String>) this.parsers.get("parser");
+                int index = parsers.indexOf(parserString);
+                parser = getParser(this.parserCode.get(index));
+            } else if(extra.containsKey("parserCode")){
+                parser = getParser((int) extra.get("parserCode"));
             }
 
             if(extra.containsKey("tableName")){
@@ -181,21 +214,23 @@ public class Storage implements FilesystemWrapper, SqlWrapper{
         }
 
         // get parser from extension
-        if(parser == null){
+        if(parser == null || tableName == null){
             Path pathFile = new Path(path);
             String fileName = pathFile.getName();
             String[] splitString = fileName.split(".");
-            if(splitString[splitString.length - 1] == "csv"){
-                parser = this.CSVParser;
+            if(parser == null){
+                if(splitString[splitString.length - 1] == "csv"){
+                    parser = getParser(0);
+                }
             }
-
-            tableName = splitString[0];
+            if(tableName == null){
+                tableName = splitString[0];
+            }
         }
 
         // check value
         if(tableName == null || parser == null) return null;
-        List<String> parsers = (List<String>) this.parsers.get("parser");
-        return new SqlTableWrapper(tableName, getParser(parsers.indexOf(parser)), path);
+        return new SqlTableWrapper(tableName, parser, path);
     }
 
     @Override
