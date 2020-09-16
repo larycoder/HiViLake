@@ -25,6 +25,7 @@ import com.usth.hieplnc.storage.api.filesystem.FilesystemWrapper;
 import com.usth.hieplnc.storage.api.filesystem.model.*;
 
 import com.usth.hieplnc.util.api.Service;
+import com.usth.hieplnc.util.base.HVUtilException;
 import com.usth.hieplnc.util.base.systemlog.Log;
 import com.usth.hieplnc.util.base.systemlog.CentralInfo;
 import com.usth.hieplnc.util.base.systemlog.model.*;
@@ -59,7 +60,7 @@ public class SystemLog implements Log, CentralInfo, Service{
 
 //=================================================================//
 // constructor
-    public SystemLog(StorageWrapper storage, String path){
+    public SystemLog(StorageWrapper storage, String path) throws HVUtilException{
         // initialize status
         initStatus();
 
@@ -88,10 +89,25 @@ public class SystemLog implements Log, CentralInfo, Service{
         initializeRepoLog();
         this.userDataFrame = initCentralInfo(this.userLog, "user log");
         this.catalogDataFrame = initCentralInfo(this.catalogLog, "catalog");
+
+        // check system error
+        JSONArray systemError = (JSONArray) ((JSONObject) this.status.get("system")).get("error");
+        if(!systemError.isEmpty()){
+            String error = "HVUtilSystemLogException: ";
+            for(Object errorObject: systemError){
+                JSONObject errorValue = (JSONObject) errorObject;
+                error += "\n\n" + errorValue.toString();
+            }
+            throw new HVUtilException(error);
+        }
     }
 
 //=================================================================//
 // method
+    public JSONObject getRawStatus(){
+        return this.status;
+    }
+
     private void initStatus(){
         // system log
         JSONArray error = new JSONArray();
@@ -910,7 +926,7 @@ public class SystemLog implements Log, CentralInfo, Service{
         }
     }
 
-    private void saveLog(String log){
+    public void saveLog(String log){
         try{
             if(log.equals("activity")){
                 // save new data
@@ -984,7 +1000,7 @@ public class SystemLog implements Log, CentralInfo, Service{
         } else{ // perform action
             String action = (String) this.parameter.get("action");
 
-            if(action.equals("countActivity")){
+            if(action.equals("countActivity")){ // countActivity
                 resetStatus();
                 Integer result = countActivity();
                 JSONObject jsonResult = new JSONObject();
@@ -992,7 +1008,7 @@ public class SystemLog implements Log, CentralInfo, Service{
                 updateResult(jsonResult);
                 this.parameter = null;
                 return this.status;
-            } else if(action.equals("listActivity")){
+            } else if(action.equals("listActivity")){ // listActivity
                 resetStatus();
                 JSONObject result = listActivity();
                 // check result
@@ -1004,7 +1020,7 @@ public class SystemLog implements Log, CentralInfo, Service{
                 updateResult(result);
                 this.parameter = null;
                 return this.status;
-            } else if(action.equals("listRepo")){
+            } else if(action.equals("listRepo")){ // listRepo
                 resetStatus();
                 JSONObject result = listRepo();
                 // check result
@@ -1016,17 +1032,17 @@ public class SystemLog implements Log, CentralInfo, Service{
                 updateResult(result);
                 this.parameter = null;
                 return this.status;
-            } else if(action.equals("registerUser")){
+            } else if(action.equals("registerUser")){ // registerUser
                 resetStatus();
                 registerUser((String) this.parameter.get("p_name"), (String) this.parameter.get("p_describe"));
                 this.parameter = null;
                 return this.status;
-            } else if(action.equals("registerCatalog")){
+            } else if(action.equals("registerCatalog")){ // registerCatalog
                 resetStatus();
                 registerCatalog((String) this.parameter.get("p_name"), (String) this.parameter.get("p_describe"));
                 this.parameter = null;
                 return this.status;
-            } else if(action.equals("listUser")){
+            } else if(action.equals("listUser")){ // listUser
                 resetStatus();
                 List<String> result = listUser();
                 if(result == null){
@@ -1043,7 +1059,7 @@ public class SystemLog implements Log, CentralInfo, Service{
                 updateResult(jsonResult);
                 this.parameter = null;
                 return this.status;
-            } else if(action.equals("listCatalog")){
+            } else if(action.equals("listCatalog")){ // listCatalog
                 resetStatus();
                 List<String> result = listCatalog();
                 if(result == null){
@@ -1060,7 +1076,7 @@ public class SystemLog implements Log, CentralInfo, Service{
                 updateResult(jsonResult);
                 this.parameter = null;
                 return this.status;
-            } else if(action.equals("getUserInfo")){
+            } else if(action.equals("getUserInfo")){ // getUserInfo
                 resetStatus();
                 String result = getUserInfo((String) this.parameter.get("p_name"));
                 JSONObject jsonResult = new JSONObject();
@@ -1068,7 +1084,7 @@ public class SystemLog implements Log, CentralInfo, Service{
                 updateResult(jsonResult);
                 this.parameter = null;
                 return this.status;
-            } else if(action.equals("getCatalogInfo")){
+            } else if(action.equals("getCatalogInfo")){ // getCatalogInfo
                 resetStatus();
                 String result = getCatalogInfo((String) this.parameter.get("p_name"));
                 JSONObject jsonResult = new JSONObject();
@@ -1076,12 +1092,12 @@ public class SystemLog implements Log, CentralInfo, Service{
                 updateResult(jsonResult);
                 this.parameter = null;
                 return this.status;
-            } else if(action.equals("setupTime")){
+            } else if(action.equals("setupTime")){ // setupTime (not usefull mehtod)
                 resetStatus();
                 setupTime((String) this.parameter.get("p_utc"), (String) this.parameter.get("p_timezone"));
                 this.parameter = null;
                 return this.status;
-            } else if(action.equals("saveLog")){
+            } else if(action.equals("saveLog")){ // saveLog
                 resetStatus();
                 saveLog((String) this.parameter.get("p_log"));
                 this.parameter = null;
