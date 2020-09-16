@@ -21,6 +21,7 @@ import com.usth.hieplnc.storage.api.filesystem.SWFilestatus;
 public interface FilesystemWrapper extends StorageWrapper{
     public void createPath(String path, int type) throws IOException;
     public void deletePath(String path, int option) throws IOException;
+    public void movePath(String dest, String src, int option) throws IOException;
     public SWFile openFile(String path) throws IOException;
     public boolean exists(String path) throws IOException;
     public SWFilestatus getStatus(String path) throws IOException;

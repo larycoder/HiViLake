@@ -125,6 +125,13 @@ public class Storage implements FilesystemWrapper, SqlWrapper{
 
         this.fs.delete(delPath, delOpt);
     }
+
+    @Override
+    public void movePath(String desc, String src, int option) throws IOException{
+        if(!this.fs.rename(new Path(src), new Path(desc))){
+            throw new IOException("something wrong with this action !");
+        }
+    }
     
     @Override
     public SWFile openFile(String path) throws IOException{
