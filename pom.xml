@@ -27,6 +27,7 @@
   <modules>
     <module>storage</module>
     <module>utilities</module>
+    <module>api</module>
   </modules>
 
   <dependencies>

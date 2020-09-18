@@ -101,3 +101,18 @@ https://www.javaguides.net/p/junit-4.html
 
 ## Apache common-csv
 https://www.callicoder.com/java-read-write-csv-file-apache-commons-csv/
+
+======================================================================================
+# Grpc
+
+## Mvn grpc goals
+https://www.xolstice.org/protobuf-maven-plugin/
+
+## QuickStart
+https://grpc.io/docs/languages/java/quickstart/
+
+## Proto3 language guide
+https://developers.google.com/protocol-buffers/docs/proto3
+
+## Java Generate code
+https://developers.google.com/protocol-buffers/docs/reference/java-generated#package

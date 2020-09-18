@@ -1,0 +1,44 @@
+syntax = "proto3";
+package com.usth.hieplnc.api.grpc.basic;
+
+option java_multiple_files = true;
+option java_package = "com.usth.hieplnc.api.grpc.basic";
+
+/**
+ * List of message definition
+ *
+ */
+message ActionRequest{
+  string route = 1;
+  string jsonAction = 2;
+  string jsonParam = 3;
+}
+
+message StatusResponse{
+  string system = 1;
+  string action = 2;
+  string result = 3;
+}
+
+message Chunk{ // chunks of data
+  bytes data = 1;
+}
+
+/**
+ * List of service
+ *
+ * NOTES:
+ *  - The setup method is 1 state calling -> therefore it
+ *  can be easy to implement to gRPC
+ *  - However, the file streaming is multiple state action
+ *  hard to perform in gRPC service since gRPC calling is
+ *  stateless. Therefore, recommandation will be using
+ *  bi-direction streaming of gRPC and sending state as the
+ *  bytes data -> need extra parser to convert raw data back
+ *  to request and response.
+ */
+service StorageManager{
+  rpc setup (ActionRequest) returns (StatusResponse) {}
+  rpc upload_file (stream Chunk) returns (stream Chunk) {}
+  rpc download_file (stream Chunk) returns (stream Chunk) {}
+}
