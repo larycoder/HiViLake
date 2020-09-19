@@ -11,10 +11,11 @@ package com.usth.hieplnc.api.grpc.basic;
  *
  * Protobuf type {@code com.usth.hieplnc.api.grpc.basic.ActionRequest}
  */
-public  final class ActionRequest extends
+public final class ActionRequest extends
     com.google.protobuf.GeneratedMessageV3 implements
     // @@protoc_insertion_point(message_implements:com.usth.hieplnc.api.grpc.basic.ActionRequest)
     ActionRequestOrBuilder {
+private static final long serialVersionUID = 0L;
   // Use ActionRequest.newBuilder() to construct.
   private ActionRequest(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
     super(builder);
@@ -26,16 +27,27 @@ public  final class ActionRequest extends
   }
 
   @java.lang.Override
+  @SuppressWarnings({"unused"})
+  protected java.lang.Object newInstance(
+      UnusedPrivateParameter unused) {
+    return new ActionRequest();
+  }
+
+  @java.lang.Override
   public final com.google.protobuf.UnknownFieldSet
   getUnknownFields() {
-    return com.google.protobuf.UnknownFieldSet.getDefaultInstance();
+    return this.unknownFields;
   }
   private ActionRequest(
       com.google.protobuf.CodedInputStream input,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws com.google.protobuf.InvalidProtocolBufferException {
     this();
-    int mutable_bitField0_ = 0;
+    if (extensionRegistry == null) {
+      throw new java.lang.NullPointerException();
+    }
+    com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+        com.google.protobuf.UnknownFieldSet.newBuilder();
     try {
       boolean done = false;
       while (!done) {
@@ -44,12 +56,6 @@ public  final class ActionRequest extends
           case 0:
             done = true;
             break;
-          default: {
-            if (!input.skipField(tag)) {
-              done = true;
-            }
-            break;
-          }
           case 10: {
             java.lang.String s = input.readStringRequireUtf8();
 
@@ -68,6 +74,13 @@ public  final class ActionRequest extends
             jsonParam_ = s;
             break;
           }
+          default: {
+            if (!parseUnknownField(
+                input, unknownFields, extensionRegistry, tag)) {
+              done = true;
+            }
+            break;
+          }
         }
       }
     } catch (com.google.protobuf.InvalidProtocolBufferException e) {
@@ -76,6 +89,7 @@ public  final class ActionRequest extends
       throw new com.google.protobuf.InvalidProtocolBufferException(
           e).setUnfinishedMessage(this);
     } finally {
+      this.unknownFields = unknownFields.build();
       makeExtensionsImmutable();
     }
   }
@@ -84,6 +98,7 @@ public  final class ActionRequest extends
     return com.usth.hieplnc.api.grpc.basic.BasicApi.internal_static_com_usth_hieplnc_api_grpc_basic_ActionRequest_descriptor;
   }
 
+  @java.lang.Override
   protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internalGetFieldAccessorTable() {
     return com.usth.hieplnc.api.grpc.basic.BasicApi.internal_static_com_usth_hieplnc_api_grpc_basic_ActionRequest_fieldAccessorTable
@@ -95,7 +110,9 @@ public  final class ActionRequest extends
   private volatile java.lang.Object route_;
   /**
    * <code>string route = 1;</code>
+   * @return The route.
    */
+  @java.lang.Override
   public java.lang.String getRoute() {
     java.lang.Object ref = route_;
     if (ref instanceof java.lang.String) {
@@ -110,7 +127,9 @@ public  final class ActionRequest extends
   }
   /**
    * <code>string route = 1;</code>
+   * @return The bytes for route.
    */
+  @java.lang.Override
   public com.google.protobuf.ByteString
       getRouteBytes() {
     java.lang.Object ref = route_;
@@ -129,7 +148,9 @@ public  final class ActionRequest extends
   private volatile java.lang.Object jsonAction_;
   /**
    * <code>string jsonAction = 2;</code>
+   * @return The jsonAction.
    */
+  @java.lang.Override
   public java.lang.String getJsonAction() {
     java.lang.Object ref = jsonAction_;
     if (ref instanceof java.lang.String) {
@@ -144,7 +165,9 @@ public  final class ActionRequest extends
   }
   /**
    * <code>string jsonAction = 2;</code>
+   * @return The bytes for jsonAction.
    */
+  @java.lang.Override
   public com.google.protobuf.ByteString
       getJsonActionBytes() {
     java.lang.Object ref = jsonAction_;
@@ -163,7 +186,9 @@ public  final class ActionRequest extends
   private volatile java.lang.Object jsonParam_;
   /**
    * <code>string jsonParam = 3;</code>
+   * @return The jsonParam.
    */
+  @java.lang.Override
   public java.lang.String getJsonParam() {
     java.lang.Object ref = jsonParam_;
     if (ref instanceof java.lang.String) {
@@ -178,7 +203,9 @@ public  final class ActionRequest extends
   }
   /**
    * <code>string jsonParam = 3;</code>
+   * @return The bytes for jsonParam.
    */
+  @java.lang.Override
   public com.google.protobuf.ByteString
       getJsonParamBytes() {
     java.lang.Object ref = jsonParam_;
@@ -194,6 +221,7 @@ public  final class ActionRequest extends
   }
 
   private byte memoizedIsInitialized = -1;
+  @java.lang.Override
   public final boolean isInitialized() {
     byte isInitialized = memoizedIsInitialized;
     if (isInitialized == 1) return true;
@@ -203,6 +231,7 @@ public  final class ActionRequest extends
     return true;
   }
 
+  @java.lang.Override
   public void writeTo(com.google.protobuf.CodedOutputStream output)
                       throws java.io.IOException {
     if (!getRouteBytes().isEmpty()) {
@@ -214,8 +243,10 @@ public  final class ActionRequest extends
     if (!getJsonParamBytes().isEmpty()) {
       com.google.protobuf.GeneratedMessageV3.writeString(output, 3, jsonParam_);
     }
+    unknownFields.writeTo(output);
   }
 
+  @java.lang.Override
   public int getSerializedSize() {
     int size = memoizedSize;
     if (size != -1) return size;
@@ -230,11 +261,11 @@ public  final class ActionRequest extends
     if (!getJsonParamBytes().isEmpty()) {
       size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, jsonParam_);
     }
+    size += unknownFields.getSerializedSize();
     memoizedSize = size;
     return size;
   }
 
-  private static final long serialVersionUID = 0L;
   @java.lang.Override
   public boolean equals(final java.lang.Object obj) {
     if (obj == this) {
@@ -245,14 +276,14 @@ public  final class ActionRequest extends
     }
     com.usth.hieplnc.api.grpc.basic.ActionRequest other = (com.usth.hieplnc.api.grpc.basic.ActionRequest) obj;
 
-    boolean result = true;
-    result = result && getRoute()
-        .equals(other.getRoute());
-    result = result && getJsonAction()
-        .equals(other.getJsonAction());
-    result = result && getJsonParam()
-        .equals(other.getJsonParam());
-    return result;
+    if (!getRoute()
+        .equals(other.getRoute())) return false;
+    if (!getJsonAction()
+        .equals(other.getJsonAction())) return false;
+    if (!getJsonParam()
+        .equals(other.getJsonParam())) return false;
+    if (!unknownFields.equals(other.unknownFields)) return false;
+    return true;
   }
 
   @java.lang.Override
@@ -343,6 +374,7 @@ public  final class ActionRequest extends
         .parseWithIOException(PARSER, input, extensionRegistry);
   }
 
+  @java.lang.Override
   public Builder newBuilderForType() { return newBuilder(); }
   public static Builder newBuilder() {
     return DEFAULT_INSTANCE.toBuilder();
@@ -350,6 +382,7 @@ public  final class ActionRequest extends
   public static Builder newBuilder(com.usth.hieplnc.api.grpc.basic.ActionRequest prototype) {
     return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
   }
+  @java.lang.Override
   public Builder toBuilder() {
     return this == DEFAULT_INSTANCE
         ? new Builder() : new Builder().mergeFrom(this);
@@ -378,6 +411,7 @@ public  final class ActionRequest extends
       return com.usth.hieplnc.api.grpc.basic.BasicApi.internal_static_com_usth_hieplnc_api_grpc_basic_ActionRequest_descriptor;
     }
 
+    @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
       return com.usth.hieplnc.api.grpc.basic.BasicApi.internal_static_com_usth_hieplnc_api_grpc_basic_ActionRequest_fieldAccessorTable
@@ -400,6 +434,7 @@ public  final class ActionRequest extends
               .alwaysUseFieldBuilders) {
       }
     }
+    @java.lang.Override
     public Builder clear() {
       super.clear();
       route_ = "";
@@ -411,15 +446,18 @@ public  final class ActionRequest extends
       return this;
     }
 
+    @java.lang.Override
     public com.google.protobuf.Descriptors.Descriptor
         getDescriptorForType() {
       return com.usth.hieplnc.api.grpc.basic.BasicApi.internal_static_com_usth_hieplnc_api_grpc_basic_ActionRequest_descriptor;
     }
 
+    @java.lang.Override
     public com.usth.hieplnc.api.grpc.basic.ActionRequest getDefaultInstanceForType() {
       return com.usth.hieplnc.api.grpc.basic.ActionRequest.getDefaultInstance();
     }
 
+    @java.lang.Override
     public com.usth.hieplnc.api.grpc.basic.ActionRequest build() {
       com.usth.hieplnc.api.grpc.basic.ActionRequest result = buildPartial();
       if (!result.isInitialized()) {
@@ -428,6 +466,7 @@ public  final class ActionRequest extends
       return result;
     }
 
+    @java.lang.Override
     public com.usth.hieplnc.api.grpc.basic.ActionRequest buildPartial() {
       com.usth.hieplnc.api.grpc.basic.ActionRequest result = new com.usth.hieplnc.api.grpc.basic.ActionRequest(this);
       result.route_ = route_;
@@ -437,32 +476,39 @@ public  final class ActionRequest extends
       return result;
     }
 
+    @java.lang.Override
     public Builder clone() {
-      return (Builder) super.clone();
+      return super.clone();
     }
+    @java.lang.Override
     public Builder setField(
         com.google.protobuf.Descriptors.FieldDescriptor field,
-        Object value) {
-      return (Builder) super.setField(field, value);
+        java.lang.Object value) {
+      return super.setField(field, value);
     }
+    @java.lang.Override
     public Builder clearField(
         com.google.protobuf.Descriptors.FieldDescriptor field) {
-      return (Builder) super.clearField(field);
+      return super.clearField(field);
     }
+    @java.lang.Override
     public Builder clearOneof(
         com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-      return (Builder) super.clearOneof(oneof);
+      return super.clearOneof(oneof);
     }
+    @java.lang.Override
     public Builder setRepeatedField(
         com.google.protobuf.Descriptors.FieldDescriptor field,
-        int index, Object value) {
-      return (Builder) super.setRepeatedField(field, index, value);
+        int index, java.lang.Object value) {
+      return super.setRepeatedField(field, index, value);
     }
+    @java.lang.Override
     public Builder addRepeatedField(
         com.google.protobuf.Descriptors.FieldDescriptor field,
-        Object value) {
-      return (Builder) super.addRepeatedField(field, value);
+        java.lang.Object value) {
+      return super.addRepeatedField(field, value);
     }
+    @java.lang.Override
     public Builder mergeFrom(com.google.protobuf.Message other) {
       if (other instanceof com.usth.hieplnc.api.grpc.basic.ActionRequest) {
         return mergeFrom((com.usth.hieplnc.api.grpc.basic.ActionRequest)other);
@@ -486,14 +532,17 @@ public  final class ActionRequest extends
         jsonParam_ = other.jsonParam_;
         onChanged();
       }
+      this.mergeUnknownFields(other.unknownFields);
       onChanged();
       return this;
     }
 
+    @java.lang.Override
     public final boolean isInitialized() {
       return true;
     }
 
+    @java.lang.Override
     public Builder mergeFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -515,6 +564,7 @@ public  final class ActionRequest extends
     private java.lang.Object route_ = "";
     /**
      * <code>string route = 1;</code>
+     * @return The route.
      */
     public java.lang.String getRoute() {
       java.lang.Object ref = route_;
@@ -530,6 +580,7 @@ public  final class ActionRequest extends
     }
     /**
      * <code>string route = 1;</code>
+     * @return The bytes for route.
      */
     public com.google.protobuf.ByteString
         getRouteBytes() {
@@ -546,6 +597,8 @@ public  final class ActionRequest extends
     }
     /**
      * <code>string route = 1;</code>
+     * @param value The route to set.
+     * @return This builder for chaining.
      */
     public Builder setRoute(
         java.lang.String value) {
@@ -559,6 +612,7 @@ public  final class ActionRequest extends
     }
     /**
      * <code>string route = 1;</code>
+     * @return This builder for chaining.
      */
     public Builder clearRoute() {
       
@@ -568,6 +622,8 @@ public  final class ActionRequest extends
     }
     /**
      * <code>string route = 1;</code>
+     * @param value The bytes for route to set.
+     * @return This builder for chaining.
      */
     public Builder setRouteBytes(
         com.google.protobuf.ByteString value) {
@@ -584,6 +640,7 @@ public  final class ActionRequest extends
     private java.lang.Object jsonAction_ = "";
     /**
      * <code>string jsonAction = 2;</code>
+     * @return The jsonAction.
      */
     public java.lang.String getJsonAction() {
       java.lang.Object ref = jsonAction_;
@@ -599,6 +656,7 @@ public  final class ActionRequest extends
     }
     /**
      * <code>string jsonAction = 2;</code>
+     * @return The bytes for jsonAction.
      */
     public com.google.protobuf.ByteString
         getJsonActionBytes() {
@@ -615,6 +673,8 @@ public  final class ActionRequest extends
     }
     /**
      * <code>string jsonAction = 2;</code>
+     * @param value The jsonAction to set.
+     * @return This builder for chaining.
      */
     public Builder setJsonAction(
         java.lang.String value) {
@@ -628,6 +688,7 @@ public  final class ActionRequest extends
     }
     /**
      * <code>string jsonAction = 2;</code>
+     * @return This builder for chaining.
      */
     public Builder clearJsonAction() {
       
@@ -637,6 +698,8 @@ public  final class ActionRequest extends
     }
     /**
      * <code>string jsonAction = 2;</code>
+     * @param value The bytes for jsonAction to set.
+     * @return This builder for chaining.
      */
     public Builder setJsonActionBytes(
         com.google.protobuf.ByteString value) {
@@ -653,6 +716,7 @@ public  final class ActionRequest extends
     private java.lang.Object jsonParam_ = "";
     /**
      * <code>string jsonParam = 3;</code>
+     * @return The jsonParam.
      */
     public java.lang.String getJsonParam() {
       java.lang.Object ref = jsonParam_;
@@ -668,6 +732,7 @@ public  final class ActionRequest extends
     }
     /**
      * <code>string jsonParam = 3;</code>
+     * @return The bytes for jsonParam.
      */
     public com.google.protobuf.ByteString
         getJsonParamBytes() {
@@ -684,6 +749,8 @@ public  final class ActionRequest extends
     }
     /**
      * <code>string jsonParam = 3;</code>
+     * @param value The jsonParam to set.
+     * @return This builder for chaining.
      */
     public Builder setJsonParam(
         java.lang.String value) {
@@ -697,6 +764,7 @@ public  final class ActionRequest extends
     }
     /**
      * <code>string jsonParam = 3;</code>
+     * @return This builder for chaining.
      */
     public Builder clearJsonParam() {
       
@@ -706,6 +774,8 @@ public  final class ActionRequest extends
     }
     /**
      * <code>string jsonParam = 3;</code>
+     * @param value The bytes for jsonParam to set.
+     * @return This builder for chaining.
      */
     public Builder setJsonParamBytes(
         com.google.protobuf.ByteString value) {
@@ -718,14 +788,16 @@ public  final class ActionRequest extends
       onChanged();
       return this;
     }
+    @java.lang.Override
     public final Builder setUnknownFields(
         final com.google.protobuf.UnknownFieldSet unknownFields) {
-      return this;
+      return super.setUnknownFields(unknownFields);
     }
 
+    @java.lang.Override
     public final Builder mergeUnknownFields(
         final com.google.protobuf.UnknownFieldSet unknownFields) {
-      return this;
+      return super.mergeUnknownFields(unknownFields);
     }
 
 
@@ -744,11 +816,12 @@ public  final class ActionRequest extends
 
   private static final com.google.protobuf.Parser<ActionRequest>
       PARSER = new com.google.protobuf.AbstractParser<ActionRequest>() {
+    @java.lang.Override
     public ActionRequest parsePartialFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-        return new ActionRequest(input, extensionRegistry);
+      return new ActionRequest(input, extensionRegistry);
     }
   };
 
@@ -761,6 +834,7 @@ public  final class ActionRequest extends
     return PARSER;
   }
 
+  @java.lang.Override
   public com.usth.hieplnc.api.grpc.basic.ActionRequest getDefaultInstanceForType() {
     return DEFAULT_INSTANCE;
   }

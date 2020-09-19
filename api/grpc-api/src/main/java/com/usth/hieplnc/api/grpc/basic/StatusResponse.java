@@ -6,10 +6,11 @@ package com.usth.hieplnc.api.grpc.basic;
 /**
  * Protobuf type {@code com.usth.hieplnc.api.grpc.basic.StatusResponse}
  */
-public  final class StatusResponse extends
+public final class StatusResponse extends
     com.google.protobuf.GeneratedMessageV3 implements
     // @@protoc_insertion_point(message_implements:com.usth.hieplnc.api.grpc.basic.StatusResponse)
     StatusResponseOrBuilder {
+private static final long serialVersionUID = 0L;
   // Use StatusResponse.newBuilder() to construct.
   private StatusResponse(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
     super(builder);
@@ -21,16 +22,27 @@ public  final class StatusResponse extends
   }
 
   @java.lang.Override
+  @SuppressWarnings({"unused"})
+  protected java.lang.Object newInstance(
+      UnusedPrivateParameter unused) {
+    return new StatusResponse();
+  }
+
+  @java.lang.Override
   public final com.google.protobuf.UnknownFieldSet
   getUnknownFields() {
-    return com.google.protobuf.UnknownFieldSet.getDefaultInstance();
+    return this.unknownFields;
   }
   private StatusResponse(
       com.google.protobuf.CodedInputStream input,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws com.google.protobuf.InvalidProtocolBufferException {
     this();
-    int mutable_bitField0_ = 0;
+    if (extensionRegistry == null) {
+      throw new java.lang.NullPointerException();
+    }
+    com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+        com.google.protobuf.UnknownFieldSet.newBuilder();
     try {
       boolean done = false;
       while (!done) {
@@ -39,12 +51,6 @@ public  final class StatusResponse extends
           case 0:
             done = true;
             break;
-          default: {
-            if (!input.skipField(tag)) {
-              done = true;
-            }
-            break;
-          }
           case 10: {
             java.lang.String s = input.readStringRequireUtf8();
 
@@ -63,6 +69,13 @@ public  final class StatusResponse extends
             result_ = s;
             break;
           }
+          default: {
+            if (!parseUnknownField(
+                input, unknownFields, extensionRegistry, tag)) {
+              done = true;
+            }
+            break;
+          }
         }
       }
     } catch (com.google.protobuf.InvalidProtocolBufferException e) {
@@ -71,6 +84,7 @@ public  final class StatusResponse extends
       throw new com.google.protobuf.InvalidProtocolBufferException(
           e).setUnfinishedMessage(this);
     } finally {
+      this.unknownFields = unknownFields.build();
       makeExtensionsImmutable();
     }
   }
@@ -79,6 +93,7 @@ public  final class StatusResponse extends
     return com.usth.hieplnc.api.grpc.basic.BasicApi.internal_static_com_usth_hieplnc_api_grpc_basic_StatusResponse_descriptor;
   }
 
+  @java.lang.Override
   protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internalGetFieldAccessorTable() {
     return com.usth.hieplnc.api.grpc.basic.BasicApi.internal_static_com_usth_hieplnc_api_grpc_basic_StatusResponse_fieldAccessorTable
@@ -90,7 +105,9 @@ public  final class StatusResponse extends
   private volatile java.lang.Object system_;
   /**
    * <code>string system = 1;</code>
+   * @return The system.
    */
+  @java.lang.Override
   public java.lang.String getSystem() {
     java.lang.Object ref = system_;
     if (ref instanceof java.lang.String) {
@@ -105,7 +122,9 @@ public  final class StatusResponse extends
   }
   /**
    * <code>string system = 1;</code>
+   * @return The bytes for system.
    */
+  @java.lang.Override
   public com.google.protobuf.ByteString
       getSystemBytes() {
     java.lang.Object ref = system_;
@@ -124,7 +143,9 @@ public  final class StatusResponse extends
   private volatile java.lang.Object action_;
   /**
    * <code>string action = 2;</code>
+   * @return The action.
    */
+  @java.lang.Override
   public java.lang.String getAction() {
     java.lang.Object ref = action_;
     if (ref instanceof java.lang.String) {
@@ -139,7 +160,9 @@ public  final class StatusResponse extends
   }
   /**
    * <code>string action = 2;</code>
+   * @return The bytes for action.
    */
+  @java.lang.Override
   public com.google.protobuf.ByteString
       getActionBytes() {
     java.lang.Object ref = action_;
@@ -158,7 +181,9 @@ public  final class StatusResponse extends
   private volatile java.lang.Object result_;
   /**
    * <code>string result = 3;</code>
+   * @return The result.
    */
+  @java.lang.Override
   public java.lang.String getResult() {
     java.lang.Object ref = result_;
     if (ref instanceof java.lang.String) {
@@ -173,7 +198,9 @@ public  final class StatusResponse extends
   }
   /**
    * <code>string result = 3;</code>
+   * @return The bytes for result.
    */
+  @java.lang.Override
   public com.google.protobuf.ByteString
       getResultBytes() {
     java.lang.Object ref = result_;
@@ -189,6 +216,7 @@ public  final class StatusResponse extends
   }
 
   private byte memoizedIsInitialized = -1;
+  @java.lang.Override
   public final boolean isInitialized() {
     byte isInitialized = memoizedIsInitialized;
     if (isInitialized == 1) return true;
@@ -198,6 +226,7 @@ public  final class StatusResponse extends
     return true;
   }
 
+  @java.lang.Override
   public void writeTo(com.google.protobuf.CodedOutputStream output)
                       throws java.io.IOException {
     if (!getSystemBytes().isEmpty()) {
@@ -209,8 +238,10 @@ public  final class StatusResponse extends
     if (!getResultBytes().isEmpty()) {
       com.google.protobuf.GeneratedMessageV3.writeString(output, 3, result_);
     }
+    unknownFields.writeTo(output);
   }
 
+  @java.lang.Override
   public int getSerializedSize() {
     int size = memoizedSize;
     if (size != -1) return size;
@@ -225,11 +256,11 @@ public  final class StatusResponse extends
     if (!getResultBytes().isEmpty()) {
       size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, result_);
     }
+    size += unknownFields.getSerializedSize();
     memoizedSize = size;
     return size;
   }
 
-  private static final long serialVersionUID = 0L;
   @java.lang.Override
   public boolean equals(final java.lang.Object obj) {
     if (obj == this) {
@@ -240,14 +271,14 @@ public  final class StatusResponse extends
     }
     com.usth.hieplnc.api.grpc.basic.StatusResponse other = (com.usth.hieplnc.api.grpc.basic.StatusResponse) obj;
 
-    boolean result = true;
-    result = result && getSystem()
-        .equals(other.getSystem());
-    result = result && getAction()
-        .equals(other.getAction());
-    result = result && getResult()
-        .equals(other.getResult());
-    return result;
+    if (!getSystem()
+        .equals(other.getSystem())) return false;
+    if (!getAction()
+        .equals(other.getAction())) return false;
+    if (!getResult()
+        .equals(other.getResult())) return false;
+    if (!unknownFields.equals(other.unknownFields)) return false;
+    return true;
   }
 
   @java.lang.Override
@@ -338,6 +369,7 @@ public  final class StatusResponse extends
         .parseWithIOException(PARSER, input, extensionRegistry);
   }
 
+  @java.lang.Override
   public Builder newBuilderForType() { return newBuilder(); }
   public static Builder newBuilder() {
     return DEFAULT_INSTANCE.toBuilder();
@@ -345,6 +377,7 @@ public  final class StatusResponse extends
   public static Builder newBuilder(com.usth.hieplnc.api.grpc.basic.StatusResponse prototype) {
     return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
   }
+  @java.lang.Override
   public Builder toBuilder() {
     return this == DEFAULT_INSTANCE
         ? new Builder() : new Builder().mergeFrom(this);
@@ -368,6 +401,7 @@ public  final class StatusResponse extends
       return com.usth.hieplnc.api.grpc.basic.BasicApi.internal_static_com_usth_hieplnc_api_grpc_basic_StatusResponse_descriptor;
     }
 
+    @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
       return com.usth.hieplnc.api.grpc.basic.BasicApi.internal_static_com_usth_hieplnc_api_grpc_basic_StatusResponse_fieldAccessorTable
@@ -390,6 +424,7 @@ public  final class StatusResponse extends
               .alwaysUseFieldBuilders) {
       }
     }
+    @java.lang.Override
     public Builder clear() {
       super.clear();
       system_ = "";
@@ -401,15 +436,18 @@ public  final class StatusResponse extends
       return this;
     }
 
+    @java.lang.Override
     public com.google.protobuf.Descriptors.Descriptor
         getDescriptorForType() {
       return com.usth.hieplnc.api.grpc.basic.BasicApi.internal_static_com_usth_hieplnc_api_grpc_basic_StatusResponse_descriptor;
     }
 
+    @java.lang.Override
     public com.usth.hieplnc.api.grpc.basic.StatusResponse getDefaultInstanceForType() {
       return com.usth.hieplnc.api.grpc.basic.StatusResponse.getDefaultInstance();
     }
 
+    @java.lang.Override
     public com.usth.hieplnc.api.grpc.basic.StatusResponse build() {
       com.usth.hieplnc.api.grpc.basic.StatusResponse result = buildPartial();
       if (!result.isInitialized()) {
@@ -418,6 +456,7 @@ public  final class StatusResponse extends
       return result;
     }
 
+    @java.lang.Override
     public com.usth.hieplnc.api.grpc.basic.StatusResponse buildPartial() {
       com.usth.hieplnc.api.grpc.basic.StatusResponse result = new com.usth.hieplnc.api.grpc.basic.StatusResponse(this);
       result.system_ = system_;
@@ -427,32 +466,39 @@ public  final class StatusResponse extends
       return result;
     }
 
+    @java.lang.Override
     public Builder clone() {
-      return (Builder) super.clone();
+      return super.clone();
     }
+    @java.lang.Override
     public Builder setField(
         com.google.protobuf.Descriptors.FieldDescriptor field,
-        Object value) {
-      return (Builder) super.setField(field, value);
+        java.lang.Object value) {
+      return super.setField(field, value);
     }
+    @java.lang.Override
     public Builder clearField(
         com.google.protobuf.Descriptors.FieldDescriptor field) {
-      return (Builder) super.clearField(field);
+      return super.clearField(field);
     }
+    @java.lang.Override
     public Builder clearOneof(
         com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-      return (Builder) super.clearOneof(oneof);
+      return super.clearOneof(oneof);
     }
+    @java.lang.Override
     public Builder setRepeatedField(
         com.google.protobuf.Descriptors.FieldDescriptor field,
-        int index, Object value) {
-      return (Builder) super.setRepeatedField(field, index, value);
+        int index, java.lang.Object value) {
+      return super.setRepeatedField(field, index, value);
     }
+    @java.lang.Override
     public Builder addRepeatedField(
         com.google.protobuf.Descriptors.FieldDescriptor field,
-        Object value) {
-      return (Builder) super.addRepeatedField(field, value);
+        java.lang.Object value) {
+      return super.addRepeatedField(field, value);
     }
+    @java.lang.Override
     public Builder mergeFrom(com.google.protobuf.Message other) {
       if (other instanceof com.usth.hieplnc.api.grpc.basic.StatusResponse) {
         return mergeFrom((com.usth.hieplnc.api.grpc.basic.StatusResponse)other);
@@ -476,14 +522,17 @@ public  final class StatusResponse extends
         result_ = other.result_;
         onChanged();
       }
+      this.mergeUnknownFields(other.unknownFields);
       onChanged();
       return this;
     }
 
+    @java.lang.Override
     public final boolean isInitialized() {
       return true;
     }
 
+    @java.lang.Override
     public Builder mergeFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -505,6 +554,7 @@ public  final class StatusResponse extends
     private java.lang.Object system_ = "";
     /**
      * <code>string system = 1;</code>
+     * @return The system.
      */
     public java.lang.String getSystem() {
       java.lang.Object ref = system_;
@@ -520,6 +570,7 @@ public  final class StatusResponse extends
     }
     /**
      * <code>string system = 1;</code>
+     * @return The bytes for system.
      */
     public com.google.protobuf.ByteString
         getSystemBytes() {
@@ -536,6 +587,8 @@ public  final class StatusResponse extends
     }
     /**
      * <code>string system = 1;</code>
+     * @param value The system to set.
+     * @return This builder for chaining.
      */
     public Builder setSystem(
         java.lang.String value) {
@@ -549,6 +602,7 @@ public  final class StatusResponse extends
     }
     /**
      * <code>string system = 1;</code>
+     * @return This builder for chaining.
      */
     public Builder clearSystem() {
       
@@ -558,6 +612,8 @@ public  final class StatusResponse extends
     }
     /**
      * <code>string system = 1;</code>
+     * @param value The bytes for system to set.
+     * @return This builder for chaining.
      */
     public Builder setSystemBytes(
         com.google.protobuf.ByteString value) {
@@ -574,6 +630,7 @@ public  final class StatusResponse extends
     private java.lang.Object action_ = "";
     /**
      * <code>string action = 2;</code>
+     * @return The action.
      */
     public java.lang.String getAction() {
       java.lang.Object ref = action_;
@@ -589,6 +646,7 @@ public  final class StatusResponse extends
     }
     /**
      * <code>string action = 2;</code>
+     * @return The bytes for action.
      */
     public com.google.protobuf.ByteString
         getActionBytes() {
@@ -605,6 +663,8 @@ public  final class StatusResponse extends
     }
     /**
      * <code>string action = 2;</code>
+     * @param value The action to set.
+     * @return This builder for chaining.
      */
     public Builder setAction(
         java.lang.String value) {
@@ -618,6 +678,7 @@ public  final class StatusResponse extends
     }
     /**
      * <code>string action = 2;</code>
+     * @return This builder for chaining.
      */
     public Builder clearAction() {
       
@@ -627,6 +688,8 @@ public  final class StatusResponse extends
     }
     /**
      * <code>string action = 2;</code>
+     * @param value The bytes for action to set.
+     * @return This builder for chaining.
      */
     public Builder setActionBytes(
         com.google.protobuf.ByteString value) {
@@ -643,6 +706,7 @@ public  final class StatusResponse extends
     private java.lang.Object result_ = "";
     /**
      * <code>string result = 3;</code>
+     * @return The result.
      */
     public java.lang.String getResult() {
       java.lang.Object ref = result_;
@@ -658,6 +722,7 @@ public  final class StatusResponse extends
     }
     /**
      * <code>string result = 3;</code>
+     * @return The bytes for result.
      */
     public com.google.protobuf.ByteString
         getResultBytes() {
@@ -674,6 +739,8 @@ public  final class StatusResponse extends
     }
     /**
      * <code>string result = 3;</code>
+     * @param value The result to set.
+     * @return This builder for chaining.
      */
     public Builder setResult(
         java.lang.String value) {
@@ -687,6 +754,7 @@ public  final class StatusResponse extends
     }
     /**
      * <code>string result = 3;</code>
+     * @return This builder for chaining.
      */
     public Builder clearResult() {
       
@@ -696,6 +764,8 @@ public  final class StatusResponse extends
     }
     /**
      * <code>string result = 3;</code>
+     * @param value The bytes for result to set.
+     * @return This builder for chaining.
      */
     public Builder setResultBytes(
         com.google.protobuf.ByteString value) {
@@ -708,14 +778,16 @@ public  final class StatusResponse extends
       onChanged();
       return this;
     }
+    @java.lang.Override
     public final Builder setUnknownFields(
         final com.google.protobuf.UnknownFieldSet unknownFields) {
-      return this;
+      return super.setUnknownFields(unknownFields);
     }
 
+    @java.lang.Override
     public final Builder mergeUnknownFields(
         final com.google.protobuf.UnknownFieldSet unknownFields) {
-      return this;
+      return super.mergeUnknownFields(unknownFields);
     }
 
 
@@ -734,11 +806,12 @@ public  final class StatusResponse extends
 
   private static final com.google.protobuf.Parser<StatusResponse>
       PARSER = new com.google.protobuf.AbstractParser<StatusResponse>() {
+    @java.lang.Override
     public StatusResponse parsePartialFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-        return new StatusResponse(input, extensionRegistry);
+      return new StatusResponse(input, extensionRegistry);
     }
   };
 
@@ -751,6 +824,7 @@ public  final class StatusResponse extends
     return PARSER;
   }
 
+  @java.lang.Override
   public com.usth.hieplnc.api.grpc.basic.StatusResponse getDefaultInstanceForType() {
     return DEFAULT_INSTANCE;
   }

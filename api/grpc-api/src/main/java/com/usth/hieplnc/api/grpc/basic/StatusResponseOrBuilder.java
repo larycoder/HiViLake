@@ -9,30 +9,36 @@ public interface StatusResponseOrBuilder extends
 
   /**
    * <code>string system = 1;</code>
+   * @return The system.
    */
   java.lang.String getSystem();
   /**
    * <code>string system = 1;</code>
+   * @return The bytes for system.
    */
   com.google.protobuf.ByteString
       getSystemBytes();
 
   /**
    * <code>string action = 2;</code>
+   * @return The action.
    */
   java.lang.String getAction();
   /**
    * <code>string action = 2;</code>
+   * @return The bytes for action.
    */
   com.google.protobuf.ByteString
       getActionBytes();
 
   /**
    * <code>string result = 3;</code>
+   * @return The result.
    */
   java.lang.String getResult();
   /**
    * <code>string result = 3;</code>
+   * @return The bytes for result.
    */
   com.google.protobuf.ByteString
       getResultBytes();

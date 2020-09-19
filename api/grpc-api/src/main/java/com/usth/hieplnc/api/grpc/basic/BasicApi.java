@@ -47,25 +47,17 @@ public final class BasicApi {
       ".com.usth.hieplnc.api.grpc.basic.ActionR" +
       "equest\032/.com.usth.hieplnc.api.grpc.basic" +
       ".StatusResponse\"\000\022c\n\013upload_file\022&.com.u" +
-      "sth.hieplnc.api.grpc.basic.Chunk\032&.com.u",
+      "sth.hieplnc.api.grpc.basic.Chunk\032&.com.u" +
       "sth.hieplnc.api.grpc.basic.Chunk\"\000(\0010\001\022e" +
       "\n\rdownload_file\022&.com.usth.hieplnc.api.g" +
       "rpc.basic.Chunk\032&.com.usth.hieplnc.api.g" +
       "rpc.basic.Chunk\"\000(\0010\001B#\n\037com.usth.hiepln" +
       "c.api.grpc.basicP\001b\006proto3"
     };
-    com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
-        new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
-          public com.google.protobuf.ExtensionRegistry assignDescriptors(
-              com.google.protobuf.Descriptors.FileDescriptor root) {
-            descriptor = root;
-            return null;
-          }
-        };
-    com.google.protobuf.Descriptors.FileDescriptor
+    descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {
-        }, assigner);
+        });
     internal_static_com_usth_hieplnc_api_grpc_basic_ActionRequest_descriptor =
       getDescriptor().getMessageTypes().get(0);
     internal_static_com_usth_hieplnc_api_grpc_basic_ActionRequest_fieldAccessorTable = new

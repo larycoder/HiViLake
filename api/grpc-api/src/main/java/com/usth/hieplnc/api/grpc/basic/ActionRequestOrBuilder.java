@@ -9,30 +9,36 @@ public interface ActionRequestOrBuilder extends
 
   /**
    * <code>string route = 1;</code>
+   * @return The route.
    */
   java.lang.String getRoute();
   /**
    * <code>string route = 1;</code>
+   * @return The bytes for route.
    */
   com.google.protobuf.ByteString
       getRouteBytes();
 
   /**
    * <code>string jsonAction = 2;</code>
+   * @return The jsonAction.
    */
   java.lang.String getJsonAction();
   /**
    * <code>string jsonAction = 2;</code>
+   * @return The bytes for jsonAction.
    */
   com.google.protobuf.ByteString
       getJsonActionBytes();
 
   /**
    * <code>string jsonParam = 3;</code>
+   * @return The jsonParam.
    */
   java.lang.String getJsonParam();
   /**
    * <code>string jsonParam = 3;</code>
+   * @return The bytes for jsonParam.
    */
   com.google.protobuf.ByteString
       getJsonParamBytes();

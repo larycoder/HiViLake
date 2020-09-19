@@ -9,6 +9,7 @@ public interface ChunkOrBuilder extends
 
   /**
    * <code>bytes data = 1;</code>
+   * @return The data.
    */
   com.google.protobuf.ByteString getData();
 }
