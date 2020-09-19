@@ -224,9 +224,9 @@ public class Storage implements FilesystemWrapper, SqlWrapper{
         if(parser == null || tableName == null){
             Path pathFile = new Path(path);
             String fileName = pathFile.getName();
-            String[] splitString = fileName.split(".");
+            String[] splitString = fileName.split("\\.");
             if(parser == null){
-                if(splitString[splitString.length - 1] == "csv"){
+                if(splitString[splitString.length - 1].equals("csv")){
                     parser = getParser(0);
                 }
             }
@@ -283,21 +283,19 @@ public class Storage implements FilesystemWrapper, SqlWrapper{
         JSONObject extra = new JSONObject();
         extra.put("tableName", "test");
         extra.put("parser", test.FsMetaParser);
-        SqlTable dirTable = test.use("/spark-logs", extra);
+        SqlTable dirTable = test.use("/", extra);
 
         // choose column
         Col nameCol = new Col("name", ColType.REAL, DataType.STRING);
         Col typeCol = new Col("type", ColType.REAL, DataType.STRING);
-        Col pathCol = new Col("path", ColType.REAL, DataType.STRING);
+        // Col pathCol = new Col("path", ColType.REAL, DataType.STRING);
         List<Col> listCol = new ArrayList<Col>();
         listCol.add(nameCol);
         listCol.add(typeCol);
-        listCol.add(pathCol);
+        // listCol.add(pathCol);
 
         // condition
-        typeCol.eq("file");
         SqlFunc whereCondition = new SqlFunc();
-        whereCondition.where(typeCol);
 
         // query
         dirTable.select(listCol, whereCondition);
@@ -306,6 +304,18 @@ public class Storage implements FilesystemWrapper, SqlWrapper{
         SqlResult result;
         try{
             result = dirTable.commit();
+            SqlTable table_1 = test.use(result).as("table_1");
+            SqlTable table_2 = test.use(result).as("table_2");
+
+            // inner join 2 table
+            table_1.join(table_2, "name", "name");
+            result = table_1.commit();
+
+            // save data
+            test.addTable("/demo", "table_1", result, test.getParser(0));
+
+            // load data from csv file
+            result = test.use("/demo/table_1.csv", null).commit();
         } catch(Exception e){
             test.close();
             e.printStackTrace();
