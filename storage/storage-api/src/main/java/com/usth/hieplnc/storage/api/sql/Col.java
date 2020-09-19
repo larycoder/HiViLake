@@ -220,6 +220,11 @@ public class Col implements SqlCondition{
         }
     }
 
+    public Col setAlias(String alias){
+        this.alias = alias;
+        return this;
+    }
+
     public String getName(){
         return this.name;
     }
