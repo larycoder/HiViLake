@@ -9,6 +9,7 @@ package com.usth.hieplnc.storage.hadoop;
 import org.apache.hadoop.fs.*;
 
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.IOException;
 
 // Storage wrapper interface
@@ -71,4 +72,8 @@ public class FileWrapper implements SWFile{
         writeData.close();
     }
 
+    @Override
+    public OutputStream getStreamWriter() throws IOException{
+        return this.fs.create(this.path);
+    }
 }

@@ -7,6 +7,7 @@ package com.usth.hieplnc.util.base.storagemanager;
  */
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.io.OutputStream;
 
 import java.util.Calendar;
 import java.util.TimeZone;
@@ -314,6 +315,98 @@ public class StorageManager implements Service{
             updateAction("update repo error", e.toString(), "3");
         }
     }
+
+    public OutputStream updateRepo(int repoId, JSONObject meta){
+        try{
+            String repoPath = this.systemLog.getRepoLocation(repoId);
+            if(repoPath == null){
+                updateAction("update repo error", "can not get repo path", "3");
+                return null;
+            }
+
+            // check exists requirement fields
+            String ch_user = (String) meta.get("user");
+            String ch_name = (String) meta.get("name");
+            String ch_type = (String) meta.get("type");
+            String ch_format = (String) meta.get("format");
+            String ch_label = (String) meta.get("label");
+
+            String[] ch_list = {ch_user, ch_name, ch_type, ch_format, ch_label};
+            for(String value: ch_list){
+                if(value == null){
+                    updateAction("update repo error", "requirement fields checking failure", "3");
+                    return null;
+                }
+            }
+
+            // check exists user
+            this.systemLog.getUserInfo(ch_user);
+            if(!isLogActionDone(this.systemLog.getRawStatus())){
+                updateAction("update repo error", "user checking failure with log: " + this.systemLog.getRawStatus().toString(), "3");
+            }
+
+            // check exists label
+            this.systemLog.getCatalogInfo(ch_label);
+            if(!isLogActionDone(this.systemLog.getRawStatus())){
+                updateAction("update repo error", "catalog checking failure with log: " + this.systemLog.getRawStatus().toString(), "3");
+            }
+
+            // get meta input
+            List<String> inputFields = new ArrayList<String>();
+            List<String> inputData = new ArrayList<String>();
+            inputFields.addAll((Set<String>) meta.keySet());
+            for(String field: inputFields){
+                inputData.add((String) meta.get(field));
+            }
+
+            // fullfill meta input
+            // setup upload time
+            Date inputDate = new Date();
+            if(inputFields.indexOf("time") > -1){
+                int index = inputFields.indexOf("time");
+                inputData.set(index, Long.toString(inputDate.getTime()));
+            } else{
+                inputFields.add("time");
+                inputData.add(Long.toString(inputDate.getTime()));
+            }
+
+            // setup path file
+            String uploadPath = repoPath + "/data/" + Long.toString(inputDate.getTime()) + "." + ch_user + "." + ch_name + "." + ch_format + ".bin";
+            if(inputFields.indexOf("path") > -1){
+                int index = inputFields.indexOf("path");
+                inputData.set(index, uploadPath);
+            } else{
+                inputFields.add("path");
+                inputData.add(uploadPath);
+            }
+
+            // load meta file
+            String metaFile = repoPath + "/.hivilake/meta.csv";
+            SqlResult metaResult = this.sqlStorage.use(metaFile, null).commit();
+            
+            // modify meta
+            List<List<String>> data = (List<List<String>>) metaResult.getData().get("data");
+            metaResult.getSchema().replace("fields", data.remove(0));
+
+            // generate new meta
+            SqlTable newMetaTable = this.sqlStorage.use(metaResult);
+            newMetaTable.insert(inputFields, inputData);
+            this.sqlStorage.addTable(repoPath + "/.hivilake", "meta", newMetaTable.commit(), this.sqlStorage.getParser(0));
+            
+            // upload file
+            this.fsStorage.createPath(uploadPath, PathType.FILE);
+            OutputStream streamWriter = this.fsStorage.openFile(uploadPath).getStreamWriter();
+            if(streamWriter == null){
+                throw new Exception("could not retrieve file writer");
+            }
+
+            updateAction("update repo", "update new repo file - done", "200");
+            return streamWriter;
+        } catch(Exception e){
+            updateAction("update repo error", e.toString(), "3");
+            return null;
+        }
+    }
     
     public void auditRepo(int repoId){
         updateAction("audit repo", "this action is not supported yet", "3");
@@ -397,7 +490,7 @@ public class StorageManager implements Service{
             int skip = (int) this.parameter.get("c_skip");
             if(skip == 0){
                 resetStatus();
-                updateAction("create repo action", "waiting to execute", "NULL");
+                updateAction((String) this.parameter.get("action"), "waiting to execute", "NULL");
             }
 
             return this.status;
@@ -430,6 +523,33 @@ public class StorageManager implements Service{
             JSONObject meta = (JSONObject) this.parameter.get("p_meta");
             updateRepo(repoId, data, meta);
             this.parameter.replace("c_skip", 1);
+        }
+    }
+
+    @Override
+    public OutputStream pushFile(){
+        // check null param
+        if(this.parameter == null){
+            return null;
+        } else{
+            int skip = (int) this.parameter.get("c_skip");
+            if(skip == 1){
+                return null;
+            }
+        }
+
+        // perform action
+        String action = (String) this.parameter.get("action");
+
+        if(action.equals("updateRepo")){
+            resetStatus();
+            int repoId = (int) this.parameter.get("p_repoId");
+            JSONObject meta = (JSONObject) this.parameter.get("p_meta");
+            OutputStream fileWriter = updateRepo(repoId, meta);
+            this.parameter.replace("c_skip", 1);
+            return fileWriter;
+        } else{
+            return null;
         }
     }
 }

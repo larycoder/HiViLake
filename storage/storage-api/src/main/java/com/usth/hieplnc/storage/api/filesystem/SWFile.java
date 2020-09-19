@@ -14,4 +14,5 @@ public interface SWFile{
     public InputStream readStream() throws IOException;
     public void append(InputStream streamData) throws IOException;
     public void writeStream(InputStream streamData) throws IOException;
+    public OutputStream getStreamWriter() throws IOException;
 }

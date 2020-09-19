@@ -9,6 +9,7 @@ package com.usth.hieplnc.util.base.systemlog;
 import java.io.IOException;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.io.OutputStream;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -1118,5 +1119,10 @@ public class SystemLog implements Log, CentralInfo, Service{
     @Override
     public void pushFile(InputStream data){
         ;
+    }
+
+    @Override
+    public OutputStream pushFile(){
+        return null;
     }
 }

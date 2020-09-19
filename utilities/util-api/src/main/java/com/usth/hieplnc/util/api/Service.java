@@ -7,6 +7,7 @@ package com.usth.hieplnc.util.api;
  */
 
 import java.io.InputStream;
+import java.io.OutputStream;
 
 import org.json.simple.JSONObject;
 
@@ -15,4 +16,5 @@ public interface Service{
     public JSONObject getStatus();
     public InputStream pullFile();
     public void pushFile(InputStream data);
+    public OutputStream pushFile();
 }
