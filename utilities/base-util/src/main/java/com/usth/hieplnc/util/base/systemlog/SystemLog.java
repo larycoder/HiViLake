@@ -37,6 +37,8 @@ import com.usth.hieplnc.util.base.systemlog.model.*;
  * - method add new data does not check position of fields before adding
  * - the return object of getParameter is reference return -> should be deep copy result return
  * - method save log is not checked type pass in -> can cause error
+ * - systemlog should not be the singleton class since it will be used by multiple class -> it is
+ * not thread-safe
  *
  */
 

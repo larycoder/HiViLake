@@ -284,7 +284,7 @@ public class StorageManager implements Service{
             }
 
             // setup path file
-            String uploadPath = repoPath + "/data/" + Long.toString(inputDate.getTime()) + "." + ch_user + "." + ch_name + "." + ch_format + ".bin";
+            String uploadPath = repoPath + "/data/" + Long.toString(inputDate.getTime()) + "." + ch_user + "." + ch_name + "." + ch_format;
             if(inputFields.indexOf("path") > -1){
                 int index = inputFields.indexOf("path");
                 inputData.set(index, uploadPath);
@@ -409,7 +409,7 @@ public class StorageManager implements Service{
     }
     
     public void auditRepo(int repoId){
-        updateAction("audit repo", "this action is not supported yet", "3");
+        updateAction("audit repo error", "this action is not supported yet", "3");
     }
 
     @Override
@@ -487,7 +487,7 @@ public class StorageManager implements Service{
             this.parameter = null;
             return this.status;
         } else{
-            int skip = (int) this.parameter.get("c_skip");
+            Integer skip = (Integer) this.parameter.get("c_skip");
             if(skip == 0){
                 resetStatus();
                 updateAction((String) this.parameter.get("action"), "waiting to execute", "NULL");
@@ -508,7 +508,7 @@ public class StorageManager implements Service{
         if(this.parameter == null){
             return;
         } else{
-            int skip = (int) this.parameter.get("c_skip");
+            Integer skip = (Integer) this.parameter.get("c_skip");
             if(skip == 1){
                 return;
             }
@@ -532,7 +532,7 @@ public class StorageManager implements Service{
         if(this.parameter == null){
             return null;
         } else{
-            int skip = (int) this.parameter.get("c_skip");
+            Integer skip = (Integer) this.parameter.get("c_skip");
             if(skip == 1){
                 return null;
             }
