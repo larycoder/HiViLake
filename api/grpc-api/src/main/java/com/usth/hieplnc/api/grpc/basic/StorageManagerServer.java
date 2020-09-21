@@ -45,7 +45,7 @@ public class StorageManagerServer implements Registor{
 
 //========================================================//
 // method
-    private void start() throws IOException{
+    public void start() throws IOException{
         this.server = ServerBuilder.forPort(this.port)
                         .addService(new StorageManagerImpl())
                         .build()
@@ -312,13 +312,6 @@ public class StorageManagerServer implements Registor{
                             this.uploadStream = null;
                         }
                     }
-                    if(serviceState == 2){
-                        this.serviceState = -1;
-                        responseObserver.onNext(Chunk.newBuilder()
-                                                        .setData(ByteString.copyFrom(this.service.getStatus()
-                                                                                                    .toString()
-                                                                                                    .getBytes())).build());
-                    }
                     this.serviceState = -1;
                     responseObserver.onCompleted();
                 }
@@ -326,9 +319,191 @@ public class StorageManagerServer implements Registor{
         }
 
         @Override
-        public StreamObserver<Chunk> downloadFile(StreamObserver<Chunk> responseObserver){
-            // do something
-            return null;
+        public StreamObserver<Chunk> downloadFile(final StreamObserver<Chunk> responseObserver){
+            final ServerCallStreamObserver<Chunk> serverCallStreamObserver = 
+                (ServerCallStreamObserver<Chunk>) responseObserver;
+            serverCallStreamObserver.disableAutoRequest();
+
+            class OnReadyHandler implements Runnable{
+                private boolean wasReady = false;
+
+                @Override
+                public void run(){
+                    if(serverCallStreamObserver.isReady() && !wasReady){
+                        wasReady = true;
+                        serverCallStreamObserver.request(1);
+                    }
+                }
+            }
+            final OnReadyHandler onReadyHandler = new OnReadyHandler();
+            serverCallStreamObserver.setOnReadyHandler(onReadyHandler);
+
+            return new StreamObserver<Chunk>(){
+                private int serviceState = 0; // -1 is dead state where client can not request anything
+                private Service service;
+                private InputStream downloadStream;
+                private byte[] buffer = new byte[1024 * 512];
+
+                @Override
+                public void onNext(Chunk request){
+                    try{
+                        ByteString rawData = request.getData();
+
+                        // state action
+                        if(serviceState == 0){
+                            // define route
+                            this.service = route.get(rawData.toString());
+                            if(this.service == null){
+                                throw new Exception("Could not find out the route");
+                            }
+                            serviceState++;
+
+                            JSONObject confirm = new JSONObject();
+                            confirm.put("system", "");
+                            confirm.put("result", "");
+                            JSONObject statusConfirm = new JSONObject();
+                            statusConfirm.put("code", "200");
+                            confirm.put("action", statusConfirm);
+                            InputStream streamConfirm = new ByteArrayInputStream(confirm.toString().getBytes());
+                            responseObserver.onNext(Chunk.newBuilder().setData(ByteString.readFrom(streamConfirm)).build());
+                        } else if(serviceState == 1){
+                            // set parameter and open file reader
+                            String action = rawData.toString();
+                            JSONParser jsonParser = new JSONParser();
+                            try{
+                                JSONObject jsonAction = (JSONObject) jsonParser.parse(action);
+                                if(this.service.setParameter(jsonAction)){
+                                    this.downloadStream = this.service.pullFile();
+                                    if(this.downloadStream != null){
+                                        serviceState++;
+                                        JSONObject confirm = new JSONObject();
+                                        confirm.put("system", "");
+                                        confirm.put("result", "");
+                                        JSONObject statusConfirm = new JSONObject();
+                                        statusConfirm.put("code", "200");
+                                        confirm.put("action", statusConfirm);
+                                        InputStream streamConfirm = new ByteArrayInputStream(confirm.toString().getBytes());
+                                        responseObserver.onNext(Chunk.newBuilder().setData(ByteString.readFrom(streamConfirm)).build());
+                                    } else{
+                                        JSONObject error = new JSONObject();
+                                        error.put("system", "");
+                                        error.put("result", "");
+                                        error.put("action", this.service.getStatus());
+                                        InputStream streamConfirm = new ByteArrayInputStream(error.toString().getBytes());
+                                        responseObserver.onNext(Chunk.newBuilder().setData(ByteString.readFrom(streamConfirm)).build());
+                                        this.serviceState = -1;
+                                        return;
+                                    }
+                                } else{
+                                    JSONObject errorJson = new JSONObject();
+                                    errorJson.put("system", new JSONObject());
+                                    JSONObject errorActionJson = new JSONObject();
+                                    errorActionJson.put("status", "download file error");
+                                    errorActionJson.put("message", "service could not parsing the action request");
+                                    errorActionJson.put("code", "4");
+                                    errorJson.put("action", errorActionJson);
+                                    errorJson.put("result", new JSONObject());
+                                    InputStream errorStream = new ByteArrayInputStream(errorJson.toString().getBytes());
+                                    Chunk reply = Chunk.newBuilder().setData(ByteString.readFrom(errorStream)).build();
+                                    responseObserver.onNext(reply);
+                                    this.serviceState = -1;
+                                    return;
+                                }
+                            } catch(ParseException e){
+                                JSONObject errorJson = new JSONObject();
+                                errorJson.put("system", new JSONObject());
+                                JSONObject errorActionJson = new JSONObject();
+                                errorActionJson.put("status", "download file error");
+                                errorActionJson.put("message", e.toString());
+                                errorActionJson.put("code", "4");
+                                errorJson.put("action", errorActionJson);
+                                errorJson.put("result", new JSONObject());
+                                InputStream errorStream = new ByteArrayInputStream(errorJson.toString().getBytes());
+                                Chunk reply = Chunk.newBuilder().setData(ByteString.readFrom(errorStream)).build();
+                                responseObserver.onNext(reply);
+                                this.serviceState = -1;
+                                return;
+                            }
+                        } else if(this.serviceState == 2){
+                            if(!rawData.toString().equals("200")){
+                                this.serviceState = -1;
+                                return;
+                            }
+
+                            // download data from server
+                            try{
+                                // read 512kb from file
+                                int len = this.downloadStream.read(this.buffer);
+                                responseObserver.onNext(Chunk.newBuilder()
+                                                            .setData(ByteString.copyFrom(this.buffer, 0, len))
+                                                            .build());
+                                
+                                if(len <= 0){
+                                    this.serviceState = -1;
+                                    return;
+                                }
+                            } catch(Exception e){
+                                JSONObject error = new JSONObject();
+                                error.put("system", "");
+                                error.put("result", "");
+                                JSONObject actionError = new JSONObject();
+                                actionError.put("status", "download file error");
+                                actionError.put("message", e.toString());
+                                actionError.put("code", "4");
+                                error.put("action", actionError);
+                                // ByteString reply = ByteString.copyFrom(error.toString().getBytes());
+                                // responseObserver.onNext(Chunk.newBuilder().setData(reply).build());
+                                this.serviceState = -1;
+                                return;
+                            }
+                        }
+                        
+                        if(serverCallStreamObserver.isReady()){
+                            serverCallStreamObserver.request(1);
+                        } else{
+                            onReadyHandler.wasReady = false;
+                        }
+                    } catch(Throwable throwable){
+                        throwable.printStackTrace();
+                        responseObserver.onError(
+                            Status.UNKNOWN.withDescription("Error handling request")
+                                            .withCause(throwable)
+                                            .asException());
+                        this.serviceState = -1;
+                    }
+                }
+
+                @Override
+                public void onError(Throwable t){
+                    t.printStackTrace();
+                    // close file
+                    if(this.downloadStream != null){
+                        try{
+                            this.downloadStream.close();
+                        } catch(Exception e){
+                            e.printStackTrace();
+                            this.downloadStream = null;
+                        }
+                    }
+                    this.serviceState = -1;
+                    responseObserver.onCompleted();
+                }
+
+                @Override
+                public void onCompleted(){
+                    // close file
+                    if(this.downloadStream != null){
+                        try{
+                            this.downloadStream.close();
+                        } catch(Exception e){
+                            e.printStackTrace();
+                            this.downloadStream = null;
+                        }
+                    }
+                    this.serviceState = -1;
+                    responseObserver.onCompleted();
+                }
+            };
         }
     }
 

@@ -52,6 +52,31 @@
         <artifactId>second-api</artifactId>
         <version>0.1.0-SNAPSHOT</version>
     </dependency>
+    
+    <!-- storage dependency -->
+    <dependency>
+        <groupId>com.usth.hieplnc</groupId>
+        <artifactId>storage-api</artifactId>
+        <version>0.1.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+        <groupId>com.usth.hieplnc.hadoop</groupId>
+        <artifactId>hadoop-storage</artifactId>
+        <version>0.1.0-SNAPSHOT</version>
+    </dependency>
+
+    <!-- util dependency -->
+    <dependency>
+        <groupId>com.usth.hieplnc</groupId>
+        <artifactId>util-api</artifactId>
+        <version>0.1.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+        <groupId>com.usth.hieplnc</groupId>
+        <artifactId>base-util</artifactId>
+        <version>0.1.0-SNAPSHOT</version>
+    </dependency>
+
   </dependencies>
 
   <build>
