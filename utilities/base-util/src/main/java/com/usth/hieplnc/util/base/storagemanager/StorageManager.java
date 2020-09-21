@@ -48,7 +48,7 @@ public class StorageManager implements Service{
 
 //=================================================================//
 // constructor
-    public StorageManager(StorageWrapper storage, SystemLog systemLog, String path) throws HVUtilException{
+    public StorageManager(StorageWrapper storage, SystemLog systemLog) throws HVUtilException{
         // load storage
         List<String> supportType = storage.support();
         if(!supportType.contains("filesystem") || !supportType.contains("sql")){

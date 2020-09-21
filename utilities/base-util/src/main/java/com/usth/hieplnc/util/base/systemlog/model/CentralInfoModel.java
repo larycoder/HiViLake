@@ -41,6 +41,7 @@ public class CentralInfoModel{
         List<String> fields = new ArrayList<String>();
         fields.add("name");
         fields.add("describe");
+        dataFrame.put("fields", fields);
 
         // build type
         List<Integer> type = new ArrayList<Integer>();
