@@ -294,11 +294,8 @@ public class Storage implements FilesystemWrapper, SqlWrapper{
         listCol.add(typeCol);
         // listCol.add(pathCol);
 
-        // condition
-        SqlFunc whereCondition = new SqlFunc();
-
         // query
-        dirTable.select(listCol, whereCondition);
+        dirTable.select(listCol, new SqlFunc());
 
         // commit
         SqlResult result;
@@ -311,11 +308,17 @@ public class Storage implements FilesystemWrapper, SqlWrapper{
             table_1.join(table_2, "name", "name");
             result = table_1.commit();
 
+            listCol.clear();
+            listCol.add(new Col("table_1.name", ColType.REAL, DataType.STRING).setAlias("true_name"));
+            result = test.use(result)
+                            .select(listCol, new SqlFunc())
+                            .commit();
+
             // save data
-            test.addTable("/demo", "table_1", result, test.getParser(0));
+            // test.addTable("/demo", "table_1", result, test.getParser(0));
 
             // load data from csv file
-            result = test.use("/demo/table_1.csv", null).commit();
+            // result = test.use("/demo/table_1.csv", null).commit();
         } catch(Exception e){
             test.close();
             e.printStackTrace();
