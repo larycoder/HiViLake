@@ -105,6 +105,23 @@ public class SystemLog implements Log, CentralInfo, Service{
         }
     }
 
+    private SystemLog(
+        String path, SqlWrapper sqlStorage, FilesystemWrapper fsStorage, 
+        JSONObject activityDataFrame, JSONObject repoDataFrame, 
+        JSONObject userDataFrame, JSONObject catalogDataFrame){
+            // add singleton data
+            this.path = path;
+            this.sqlStorage = sqlStorage;
+            this.fsStorage = fsStorage;
+            this.activityDataFrame = activityDataFrame;
+            this.repoDataFrame = repoDataFrame;
+            this.userDataFrame = userDataFrame;
+            this.catalogDataFrame = catalogDataFrame;
+
+            // init other value
+            initStatus();
+    }
+
 //=================================================================//
 // method
     public JSONObject getRawStatus(){
@@ -184,7 +201,12 @@ public class SystemLog implements Log, CentralInfo, Service{
                 SqlResult tableResult = table.commit();
 
                 // get schema of table
-                this.activityDataFrame = tableResult.getSchema();
+                if(this.activityDataFrame != null){
+                    this.activityDataFrame.clear();
+                    this.activityDataFrame.putAll(tableResult.getSchema());
+                } else{
+                    this.activityDataFrame = tableResult.getSchema();
+                }
 
                 // get data of table
                 List<List<String>> data = (List<List<String>>) tableResult.getData().get("data");
@@ -232,7 +254,12 @@ public class SystemLog implements Log, CentralInfo, Service{
                 SqlResult tableResult = table.commit();
 
                 // get schema of table
-                this.repoDataFrame = tableResult.getSchema();
+                if(this.repoDataFrame != null){
+                    this.repoDataFrame.clear();
+                    this.repoDataFrame.putAll(tableResult.getSchema());
+                } else{
+                    this.repoDataFrame = tableResult.getSchema();
+                }
 
                 // get data of table
                 List<List<String>> data = (List<List<String>>) tableResult.getData().get("data");
@@ -585,8 +612,13 @@ public class SystemLog implements Log, CentralInfo, Service{
                 // save csv file
                 parser.save(this.path, this.userLog, saveSchema, saveData);
 
-                // load data
-                this.userDataFrame = initCentralInfo(this.userLog, "user log");
+                // load data 
+                JSONObject userDataFrameTemp = initCentralInfo(this.userLog, "user log");
+                if(userDataFrameTemp == null){
+                    throw new Exception("Could not load new " + this.userLog);
+                }
+                this.userDataFrame.clear();
+                this.userDataFrame.putAll(userDataFrameTemp);
 
                 JSONObject resp = new JSONObject();
                 resp.put("status", "success");
@@ -713,7 +745,12 @@ public class SystemLog implements Log, CentralInfo, Service{
                 parser.save(this.path, this.catalogLog, saveSchema, saveData);
 
                 // load data
-                this.catalogDataFrame = initCentralInfo(this.catalogLog, "catalog log");
+                JSONObject catalogDataFrameTemp = initCentralInfo(this.catalogLog, "catalog log");
+                if(catalogDataFrameTemp == null){
+                    throw new Exception("Could not load new " + this.catalogLog);
+                }
+                this.catalogDataFrame.clear();
+                this.catalogDataFrame.putAll(catalogDataFrameTemp);
 
                 JSONObject resp = new JSONObject();
                 resp.put("status", "success");
@@ -1126,5 +1163,12 @@ public class SystemLog implements Log, CentralInfo, Service{
     @Override
     public OutputStream pushFile(){
         return null;
+    }
+
+    @Override
+    public Service duplicate(){
+        return new SystemLog(this.path, this.sqlStorage, this.fsStorage,
+                                this.activityDataFrame, this.repoDataFrame,
+                                this.userDataFrame, this.catalogDataFrame);
     }
 }

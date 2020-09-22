@@ -91,7 +91,7 @@ public class StorageManagerServer implements Registor{
         @Override
         public void setup(ActionRequest request, StreamObserver<StatusResponse> responseObserver){
             // get service
-            Service service = route.get(request.getRoute());
+            Service service = route.get(request.getRoute()).duplicate();
             
             // build request
             JSONObject utilRequest = new JSONObject();
@@ -176,10 +176,11 @@ public class StorageManagerServer implements Registor{
                         // state action
                         if(serviceState == 0){
                             // define route
-                            this.service = route.get(rawData.toString());
-                            if(this.service == null){
+                            Service serviceTemp = route.get(rawData.toString());
+                            if(serviceTemp == null){
                                 throw new Exception("Could not find out the route");
                             }
+                            this.service = serviceTemp.duplicate();
                             serviceState++;
                             
                             JSONObject confirm = new JSONObject();
@@ -352,10 +353,11 @@ public class StorageManagerServer implements Registor{
                         // state action
                         if(serviceState == 0){
                             // define route
-                            this.service = route.get(rawData.toString());
-                            if(this.service == null){
+                            Service serviceTemp = route.get(rawData.toString());
+                            if(serviceTemp == null){
                                 throw new Exception("Could not find out the route");
                             }
+                            this.service = serviceTemp.duplicate();
                             serviceState++;
 
                             JSONObject confirm = new JSONObject();

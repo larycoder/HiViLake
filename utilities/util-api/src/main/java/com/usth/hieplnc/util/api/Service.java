@@ -17,4 +17,5 @@ public interface Service{
     public InputStream pullFile();
     public void pushFile(InputStream data);
     public OutputStream pushFile();
+    public Service duplicate();
 }

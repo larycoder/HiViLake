@@ -55,6 +55,14 @@ public class FileQuery implements Service{
         initStatus();
     }
 
+    private FileQuery(FilesystemWrapper fsStorage, SqlWrapper sqlStorage, SystemLog systemLog){
+        this.fsStorage = fsStorage;
+        this.sqlStorage = sqlStorage;
+        this.systemLog = systemLog;
+
+        initStatus();
+    }
+
 //=================================================================//
 // method
     private void initStatus(){
@@ -444,5 +452,10 @@ public class FileQuery implements Service{
         this.parameter = null;
         updateAction("push file", "this method is not supported", "3");
         return null;
+    }
+
+    @Override
+    public Service duplicate(){
+        return new FileQuery(this.fsStorage, this.sqlStorage, (SystemLog) this.systemLog.duplicate());
     }
 }

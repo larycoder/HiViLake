@@ -27,7 +27,7 @@ public class Application{
                                             .newInstance();
 
         // init util
-        Service systemLogService = new SystemLog(storage, "/demo/system_log");
+        Service systemLogService = new SystemLog(storage, "/hv_demo/system_log");
         Service storageManagerService = new StorageManager(storage, (SystemLog) systemLogService);
         Service fileQuerService = new FileQuery(storage, (SystemLog) systemLogService);
 

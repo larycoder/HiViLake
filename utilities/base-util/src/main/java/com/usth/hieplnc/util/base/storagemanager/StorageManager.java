@@ -66,6 +66,14 @@ public class StorageManager implements Service{
         initStatus();
     }
 
+    private StorageManager(FilesystemWrapper fsStorage, SqlWrapper sqlStorage, SystemLog systemLog){
+        this.fsStorage = fsStorage;
+        this.sqlStorage = sqlStorage;
+        this.systemLog = systemLog;
+
+        initStatus();
+    }
+
 //=================================================================//
 // method
     // log working method
@@ -551,5 +559,10 @@ public class StorageManager implements Service{
         } else{
             return null;
         }
+    }
+
+    @Override
+    public Service duplicate(){
+        return new StorageManager(this.fsStorage, this.sqlStorage, (SystemLog) this.systemLog.duplicate());
     }
 }
