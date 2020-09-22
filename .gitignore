@@ -4,3 +4,5 @@ doc/**/image
 **/target
 share
 !doc/**/template.*
+
+!doc/Sysdoc/**/*.md
