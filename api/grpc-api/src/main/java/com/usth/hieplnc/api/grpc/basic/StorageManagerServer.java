@@ -101,6 +101,7 @@ public class StorageManagerServer implements Registor{
 
             // get parameter
             JSONParser jsonParser = new JSONParser();
+            System.out.println("Request received in setup service");
             try{
                 utilRequest.put("parameter", jsonParser.parse(request.getJsonParam()));
             } catch(ParseException e){
@@ -173,10 +174,13 @@ public class StorageManagerServer implements Registor{
                     try{
                         ByteString rawData = request.getData();
 
+                        // recive request
+                        System.out.println("service upload file trigger");
+                        
                         // state action
                         if(serviceState == 0){
                             // define route
-                            Service serviceTemp = route.get(rawData.toString());
+                            Service serviceTemp = route.get(rawData.toStringUtf8());
                             if(serviceTemp == null){
                                 throw new Exception("Could not find out the route");
                             }
@@ -193,7 +197,7 @@ public class StorageManagerServer implements Registor{
                             responseObserver.onNext(Chunk.newBuilder().setData(ByteString.readFrom(streamConfirm)).build());
                         } else if(serviceState == 1){
                             // set parameter and open file writer
-                            String action = rawData.toString();
+                            String action = rawData.toStringUtf8();
                             JSONParser jsonParser = new JSONParser();
                             try{
                                 JSONObject jsonAction = (JSONObject) jsonParser.parse(action);
@@ -267,6 +271,17 @@ public class StorageManagerServer implements Registor{
                                 responseObserver.onNext(Chunk.newBuilder().setData(reply).build());
                                 this.serviceState = -1;
                             }
+                        } else{
+                            JSONObject error = new JSONObject();
+                            error.put("system", "");
+                            error.put("result", "");
+                            JSONObject actionError = new JSONObject();
+                            actionError.put("status", "upload file error");
+                            actionError.put("message", "Service state out of index: " + Integer.toString(serviceState));
+                            actionError.put("code", "4");
+                            error.put("action", actionError);
+                            ByteString reply = ByteString.copyFrom(error.toString().getBytes());
+                            responseObserver.onNext(Chunk.newBuilder().setData(reply).build());
                         }
 
                         if(serverCallStreamObserver.isReady()){
@@ -286,6 +301,7 @@ public class StorageManagerServer implements Registor{
 
                 @Override
                 public void onError(Throwable t){
+                    System.out.println("Service upload_file error call");
                     t.printStackTrace();
                     // close file
                     if(this.uploadStream != null){
@@ -313,6 +329,7 @@ public class StorageManagerServer implements Registor{
                             this.uploadStream = null;
                         }
                     }
+                    System.out.println("Service upload_file completed");
                     this.serviceState = -1;
                     responseObserver.onCompleted();
                 }
@@ -353,7 +370,7 @@ public class StorageManagerServer implements Registor{
                         // state action
                         if(serviceState == 0){
                             // define route
-                            Service serviceTemp = route.get(rawData.toString());
+                            Service serviceTemp = route.get(rawData.toStringUtf8());
                             if(serviceTemp == null){
                                 throw new Exception("Could not find out the route");
                             }
@@ -370,7 +387,7 @@ public class StorageManagerServer implements Registor{
                             responseObserver.onNext(Chunk.newBuilder().setData(ByteString.readFrom(streamConfirm)).build());
                         } else if(serviceState == 1){
                             // set parameter and open file reader
-                            String action = rawData.toString();
+                            String action = rawData.toStringUtf8();
                             JSONParser jsonParser = new JSONParser();
                             try{
                                 JSONObject jsonAction = (JSONObject) jsonParser.parse(action);
@@ -427,7 +444,7 @@ public class StorageManagerServer implements Registor{
                                 return;
                             }
                         } else if(this.serviceState == 2){
-                            if(!rawData.toString().equals("200")){
+                            if(!rawData.toStringUtf8().equals("200")){
                                 this.serviceState = -1;
                                 return;
                             }
