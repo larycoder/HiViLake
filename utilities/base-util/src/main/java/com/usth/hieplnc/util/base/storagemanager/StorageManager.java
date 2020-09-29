@@ -353,14 +353,14 @@ public class StorageManager implements Service{
             this.systemLog.getUserInfo(ch_user);
             if(!isLogActionDone(this.systemLog.getRawStatus())){
                 updateAction("update repo error", "user checking failure with log: " + this.systemLog.getRawStatus().toString(), "3");
-                return;
+                return null;
             }
 
             // check exists label
             this.systemLog.getCatalogInfo(ch_label);
             if(!isLogActionDone(this.systemLog.getRawStatus())){
                 updateAction("update repo error", "catalog checking failure with log: " + this.systemLog.getRawStatus().toString(), "3");
-                return;
+                return null;
             }
 
             // get meta input
