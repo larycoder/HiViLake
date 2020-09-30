@@ -385,6 +385,8 @@ public class StorageManagerServer implements Registor{
                             confirm.put("system", "");
                             confirm.put("result", "");
                             JSONObject statusConfirm = new JSONObject();
+                            statusConfirm.put("status", "service state: 0");
+                            statusConfirm.put("message", "pass state - done");
                             statusConfirm.put("code", "200");
                             confirm.put("action", statusConfirm);
                             InputStream streamConfirm = new ByteArrayInputStream(confirm.toString().getBytes());
@@ -403,6 +405,8 @@ public class StorageManagerServer implements Registor{
                                         confirm.put("system", "");
                                         confirm.put("result", "");
                                         JSONObject statusConfirm = new JSONObject();
+                                        statusConfirm.put("status", "service state: 1");
+                                        statusConfirm.put("message", "pass state - done");
                                         statusConfirm.put("code", "200");
                                         confirm.put("action", statusConfirm);
                                         InputStream streamConfirm = new ByteArrayInputStream(confirm.toString().getBytes());
@@ -415,6 +419,7 @@ public class StorageManagerServer implements Registor{
                                         InputStream streamConfirm = new ByteArrayInputStream(error.toString().getBytes());
                                         responseObserver.onNext(Chunk.newBuilder().setData(ByteString.readFrom(streamConfirm)).build());
                                         this.serviceState = -1;
+                                        responseObserver.onCompleted();
                                         return;
                                     }
                                 } else{
@@ -430,6 +435,7 @@ public class StorageManagerServer implements Registor{
                                     Chunk reply = Chunk.newBuilder().setData(ByteString.readFrom(errorStream)).build();
                                     responseObserver.onNext(reply);
                                     this.serviceState = -1;
+                                    responseObserver.onCompleted();
                                     return;
                                 }
                             } catch(ParseException e){
@@ -444,26 +450,58 @@ public class StorageManagerServer implements Registor{
                                 InputStream errorStream = new ByteArrayInputStream(errorJson.toString().getBytes());
                                 Chunk reply = Chunk.newBuilder().setData(ByteString.readFrom(errorStream)).build();
                                 responseObserver.onNext(reply);
+                                // close file
+                                if(this.downloadStream != null){
+                                    try{
+                                        this.downloadStream.close();
+                                    } catch(Exception closeException){
+                                        closeException.printStackTrace();
+                                        this.downloadStream = null;
+                                    }
+                                }
                                 this.serviceState = -1;
+                                responseObserver.onCompleted();
                                 return;
                             }
                         } else if(this.serviceState == 2){
                             if(!rawData.toStringUtf8().equals("200")){
                                 this.serviceState = -1;
+                                // close file
+                                if(this.downloadStream != null){
+                                    try{
+                                        this.downloadStream.close();
+                                    } catch(Exception e){
+                                        e.printStackTrace();
+                                        this.downloadStream = null;
+                                    }
+                                }
+                                responseObserver.onCompleted();
                                 return;
                             }
 
                             // download data from server
                             try{
                                 // read 512kb from file
-                                int len = this.downloadStream.read(this.buffer);
-                                responseObserver.onNext(Chunk.newBuilder()
-                                                            .setData(ByteString.copyFrom(this.buffer, 0, len))
-                                                            .build());
-                                
-                                if(len <= 0){
-                                    this.serviceState = -1;
-                                    return;
+                                while(true){
+                                    int len = this.downloadStream.read(this.buffer);
+                                    responseObserver.onNext(Chunk.newBuilder()
+                                                                .setData(ByteString.copyFrom(this.buffer, 0, len))
+                                                                .build());
+                                    
+                                    if(len <= 0){
+                                        this.serviceState = -1;
+                                        // close file
+                                        if(this.downloadStream != null){
+                                            try{
+                                                this.downloadStream.close();
+                                            } catch(Exception e){
+                                                e.printStackTrace();
+                                                this.downloadStream = null;
+                                            }
+                                        }
+                                        responseObserver.onCompleted();
+                                        return;
+                                    }
                                 }
                             } catch(Exception e){
                                 JSONObject error = new JSONObject();
@@ -477,6 +515,16 @@ public class StorageManagerServer implements Registor{
                                 // ByteString reply = ByteString.copyFrom(error.toString().getBytes());
                                 // responseObserver.onNext(Chunk.newBuilder().setData(reply).build());
                                 this.serviceState = -1;
+                                // close file
+                                if(this.downloadStream != null){
+                                    try{
+                                        this.downloadStream.close();
+                                    } catch(Exception closeException){
+                                        closeException.printStackTrace();
+                                        this.downloadStream = null;
+                                    }
+                                }
+                                responseObserver.onCompleted();
                                 return;
                             }
                         }
@@ -488,6 +536,15 @@ public class StorageManagerServer implements Registor{
                         }
                     } catch(Throwable throwable){
                         throwable.printStackTrace();
+                        // close file
+                        if(this.downloadStream != null){
+                            try{
+                                this.downloadStream.close();
+                            } catch(Exception e){
+                                e.printStackTrace();
+                                this.downloadStream = null;
+                            }
+                        }
                         responseObserver.onError(
                             Status.UNKNOWN.withDescription("Error handling request")
                                             .withCause(throwable)
@@ -509,7 +566,7 @@ public class StorageManagerServer implements Registor{
                         }
                     }
                     this.serviceState = -1;
-                    responseObserver.onCompleted();
+                    // responseObserver.onCompleted();
                 }
 
                 @Override
@@ -524,7 +581,7 @@ public class StorageManagerServer implements Registor{
                         }
                     }
                     this.serviceState = -1;
-                    responseObserver.onCompleted();
+                    // responseObserver.onCompleted();
                 }
             };
         }
