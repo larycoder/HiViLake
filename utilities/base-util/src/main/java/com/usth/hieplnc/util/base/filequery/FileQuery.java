@@ -194,7 +194,15 @@ public class FileQuery implements Service{
 
             if(this.fsStorage.getStatus(workPath).isFile()){
                 // this is file -> check type in meta
-                SqlTable metaTable = this.sqlStorage.use(metaPath, null);
+                SqlTable metaWrongFieldTable = this.sqlStorage.use(metaPath, null);
+                SqlResult metaWrongFieldResult = metaWrongFieldTable.commit();
+
+                // rebuild meta table
+                List<List<String>> metaData = (List<List<String>>) metaWrongFieldResult.getData().get("data");
+                List<String> metaField = (List<String>) metaWrongFieldResult.getSchema().get("fields");
+                metaField.clear();
+                metaField.addAll(metaData.remove(0));
+                SqlTable metaTable = this.sqlStorage.use(metaWrongFieldResult);
                 
                 // field of meta
                 List<Col> selectFields = new ArrayList<Col>();
@@ -394,7 +402,7 @@ public class FileQuery implements Service{
         // perform action
         String action = (String) this.parameter.get("action");
 
-        if(action.equals("searchRepo")){
+        if(action.equals("searchStorage")){
             resetStatus();
             JSONObject result = searchStorage((int) this.parameter.get("p_repoId"), (JSONObject) this.parameter.get("p_expr"));
             if(result != null){

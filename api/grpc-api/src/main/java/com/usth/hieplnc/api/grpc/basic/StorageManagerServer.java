@@ -191,6 +191,8 @@ public class StorageManagerServer implements Registor{
                             confirm.put("system", "");
                             confirm.put("result", "");
                             JSONObject statusConfirm = new JSONObject();
+                            statusConfirm.put("status", "service state: 0");
+                            statusConfirm.put("message", "pass state - done");
                             statusConfirm.put("code", "200");
                             confirm.put("action", statusConfirm);
                             InputStream streamConfirm = new ByteArrayInputStream(confirm.toString().getBytes());
@@ -209,6 +211,8 @@ public class StorageManagerServer implements Registor{
                                         confirm.put("system", "");
                                         confirm.put("result", "");
                                         JSONObject statusConfirm = new JSONObject();
+                                        statusConfirm.put("status", "service state: 1");
+                                        statusConfirm.put("message", "pass state - done");
                                         statusConfirm.put("code", "200");
                                         confirm.put("action", statusConfirm);
                                         InputStream streamConfirm = new ByteArrayInputStream(confirm.toString().getBytes());
