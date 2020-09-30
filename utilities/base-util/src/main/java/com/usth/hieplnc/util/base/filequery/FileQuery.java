@@ -241,7 +241,7 @@ public class FileQuery implements Service{
                 JSONObject sqlExtra = new JSONObject();
                 // get dir name
                 String[] workPathName = workPath.split("/");
-                for(int i = workPathName.length; i >= 0; i--){
+                for(int i = workPathName.length - 1; i >= 0; i--){
                     if(!workPathName[i].equals("")){
                         sqlExtra.put("tableName", workPathName[i]);
                         break;
